@@ -346,6 +346,22 @@ def aprender():
         return jsonify({"mensaje": "Aprendizaje completado"})
     except Exception as e:
         return jsonify({"error": str(e)})
+
+@app.route('/api/compras', methods=['POST'])
+def compras():
+    data = request.json
+    query = data.get('query', '')
+    
+    if not query:
+        return jsonify({"error": "Escribe una consulta de compra"})
+    
+    try:
+        from shopping_assistant import ShoppingAssistant
+        asistente = ShoppingAssistant()
+        resultado = asistente.recomendar(query)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)})
 # ================================================================
 # INICIO
 # ================================================================
