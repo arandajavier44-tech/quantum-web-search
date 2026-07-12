@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 Quantum Web Search</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background: #0a0a0f;
+            color: #e4e4e7;
+        }
+        body.dark-mode .header { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .header h1 span { color: #a78bfa; }
+        body.dark-mode .search-box input { background: #1a1a26; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
+        body.dark-mode .search-box input:focus { border-color: #7c3aed; }
+        body.dark-mode .result-card { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .result-card .title a { color: #a78bfa; }
+        body.dark-mode .result-card .desc { color: #a1a1aa; }
+        body.dark-mode .result-card .meta { color: #71717a; }
+        body.dark-mode .result-card .url { color: #52525b; }
+        body.dark-mode .stats-bar .stat { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #a1a1aa; }
+        body.dark-mode .stats-bar .stat strong { color: #e4e4e7; }
+        body.dark-mode .no-results { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #71717a; }
+        body.dark-mode .loading { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #71717a; }
+        body.dark-mode .error { background: #12121a; border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+        body.dark-mode .cerebro-result { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .cerebro-card { background: rgba(255,255,255,0.03); }
+        body.dark-mode .cerebro-card .label { color: #71717a; }
+        body.dark-mode .cerebro-tag { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        body.dark-mode .cache-info { color: #52525b; }
+        body.dark-mode .historial-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .dashboard-card { background: rgba(255,255,255,0.03); }
+        body.dark-mode .dashboard-card .label { color: #71717a; }
+        body.dark-mode .modal-content { background: #1a1a2e; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .modal-content input { background: #12121a; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
+        body.dark-mode .pagination-controls select { background: #1a1a26; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
+        body.dark-mode #resultadosInstantaneos { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+
+        body.light-mode {
+            background: #f0f0f5;
+            color: #1a1a2e;
+        }
+        body.light-mode .header { background: linear-gradient(135deg, #e8e8f0, #d5d5e0); border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .header h1 span { color: #4f46e5; }
+        body.light-mode .search-box input { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
+        body.light-mode .search-box input:focus { border-color: #4f46e5; }
+        body.light-mode .result-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .result-card .title a { color: #4f46e5; }
+        body.light-mode .result-card .desc { color: #4a4a5a; }
+        body.light-mode .result-card .meta { color: #6a6a7a; }
+        body.light-mode .result-card .url { color: #8a8a9a; }
+        body.light-mode .stats-bar .stat { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
+        body.light-mode .stats-bar .stat strong { color: #1a1a2e; }
+        body.light-mode .no-results { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
+        body.light-mode .loading { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
+        body.light-mode .error { background: #ffffff; border: 1px solid rgba(239,68,68,0.2); color: #dc2626; }
+        body.light-mode .cerebro-result { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .cerebro-card { background: rgba(0,0,0,0.03); }
+        body.light-mode .cerebro-card .label { color: #6a6a7a; }
+        body.light-mode .cerebro-tag { background: rgba(79,70,229,0.1); color: #4f46e5; }
+        body.light-mode .cache-info { color: #6a6a7a; }
+        body.light-mode .historial-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .dashboard-card { background: rgba(0,0,0,0.03); }
+        body.light-mode .dashboard-card .label { color: #6a6a7a; }
+        body.light-mode .modal-content { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .modal-content input { background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
+        body.light-mode .pagination-controls select { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
+        body.light-mode #resultadosInstantaneos { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+
+        .container { max-width: 1000px; width: 100%; }
+        .header {
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: background 0.3s, border 0.3s;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header h1 { font-size: 28px; }
+        .header .sub { font-size: 14px; margin-top: 4px; opacity: 0.7; }
+        .header .badges {
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .header .badge {
+            display: inline-block;
+            padding: 2px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge.grover { background: #7c3aed; color: white; }
+        .badge.cerebro { background: #059669; color: white; }
+        .badge.qrng { background: #4f46e5; color: white; }
+        .badge.bell { background: #0891b2; color: white; }
+        .badge.vqe { background: #d97706; color: white; }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .header-actions button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #a1a1aa;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .header-actions button:hover { background: rgba(255,255,255,0.1); color: #e4e4e7; }
+        body.light-mode .header-actions button {
+            background: rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+            color: #4a4a5a;
+        }
+        body.light-mode .header-actions button:hover { background: rgba(0,0,0,0.1); }
+
+        #wsStatus { font-size:12px; }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s, color 0.3s;
+            min-width: 200px;
+        }
+        .search-box button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .search-box button:hover { transform: scale(1.02); }
+        .search-box button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-search { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+        .btn-cerebro { background: linear-gradient(135deg, #7c3aed, #059669); }
+
+        .pagination-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .pagination-controls select {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            transition: background 0.3s, border 0.3s, color 0.3s;
+        }
+        .pagination-controls button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #a1a1aa;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .pagination-controls button:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+        .pagination-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .mode-indicator {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .mode-grover { background: rgba(124,58,237,0.2); color: #a78bfa; }
+        .mode-cerebro { background: rgba(5,150,105,0.2); color: #22c55e; }
+        body.light-mode .mode-grover { background: rgba(79,70,229,0.1); color: #4f46e5; }
+        body.light-mode .mode-cerebro { background: rgba(5,150,105,0.1); color: #059669; }
+
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .stats-bar .stat {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: background 0.3s, border 0.3s, color 0.3s;
+        }
+
+        .result-card {
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        .result-card:hover { border-color: #7c3aed !important; }
+        .result-card .title { font-size: 17px; font-weight: 600; }
+        .result-card .title a { text-decoration: none; }
+        .result-card .title a:hover { text-decoration: underline; }
+        .result-card .desc { font-size: 14px; margin: 4px 0; line-height: 1.5; }
+        .result-card .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            font-size: 12px;
+        }
+        .result-card .meta .relevance {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-weight: 600;
+        }
+        .result-card .meta .stars { color: #fbbf24; }
+        .result-card .url { font-size: 12px; margin-top: 4px; word-break: break-all; }
+
+        .cerebro-result {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: background 0.3s, border 0.3s;
+        }
+        .cerebro-result h3 { color: #a78bfa; margin-bottom: 8px; font-size: 18px; }
+        body.light-mode .cerebro-result h3 { color: #4f46e5; }
+        .cerebro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .cerebro-card {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .cerebro-card .value { font-size: 22px; font-weight: 700; color: #a78bfa; }
+        body.light-mode .cerebro-card .value { color: #4f46e5; }
+        .cerebro-card .value.green { color: #22c55e; }
+        .cerebro-card .value.yellow { color: #fbbf24; }
+        .cerebro-card .value.blue { color: #60a5fa; }
+        .cerebro-card .label { font-size: 11px; margin-top: 4px; }
+        .cerebro-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .cerebro-tag { padding: 4px 12px; border-radius: 12px; font-size: 13px; transition: background 0.3s, color 0.3s; }
+        .cerebro-grover { margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 14px; color: #a1a1aa; }
+        body.light-mode .cerebro-grover { background: rgba(0,0,0,0.03); color: #4a4a5a; }
+        .cerebro-grover strong { color: #a78bfa; }
+        body.light-mode .cerebro-grover strong { color: #4f46e5; }
+
+        .loading, .no-results, .error {
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 12px;
+            transition: background 0.3s, border 0.3s, color 0.3s;
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #1a1a26;
+            border-top-color: #7c3aed;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        body.light-mode .loading .spinner {
+            border: 3px solid #e0e0e0;
+            border-top-color: #4f46e5;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .cache-info {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 12px;
+            transition: color 0.3s;
+        }
+
+        .dashboard-section {
+            display: none;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s, border 0.3s;
+        }
+        body.light-mode .dashboard-section { border-color: rgba(0,0,0,0.05); }
+        .dashboard-section.show { display: block; }
+        .dashboard-section h3 { color: #a78bfa; margin-bottom: 12px; }
+        body.light-mode .dashboard-section h3 { color: #4f46e5; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .dashboard-card {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .dashboard-card .value { font-size: 22px; font-weight: 700; color: #a78bfa; }
+        body.light-mode .dashboard-card .value { color: #4f46e5; }
+        .dashboard-card .label { font-size: 11px; margin-top: 4px; }
+
+        .historial-section {
+            display: none;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        body.light-mode .historial-section { border-color: rgba(0,0,0,0.05); }
+        .historial-section.show { display: block; }
+        .historial-section h3 { color: #a78bfa; margin-bottom: 12px; }
+        body.light-mode .historial-section h3 { color: #4f46e5; }
+        .historial-item {
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        body.light-mode .historial-item { border-bottom-color: rgba(0,0,0,0.05); }
+        .historial-item .query { font-weight: 600; }
+        .historial-item .algo { font-size: 11px; padding: 2px 8px; border-radius: 8px; background: #7c3aed; color: white; }
+        body.light-mode .historial-item .algo { background: #4f46e5; }
+        .historial-item .fecha { font-size: 11px; opacity: 0.6; }
+
+        #resultadosInstantaneos {
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            transition: background 0.3s, border 0.3s;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 90%;
+            transition: background 0.3s, border 0.3s;
+        }
+        .modal-content h2 { color: #a78bfa; margin-bottom: 16px; }
+        body.light-mode .modal-content h2 { color: #4f46e5; }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: background 0.3s, border 0.3s, color 0.3s;
+        }
+        .modal-content input:focus { border-color: #7c3aed; }
+        .modal-content .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 8px;
+        }
+        .modal-content .btn-primary:hover { opacity: 0.9; }
+        .modal-close {
+            float: right;
+            opacity: 0.6;
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+        }
+        .modal-close:hover { opacity: 1; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .search-box { flex-direction: column; }
+            .search-box button { width: 100%; justify-content: center; }
+            .header h1 { font-size: 22px; }
+            .header-top { flex-direction: column; align-items: center; }
+            .stats-bar { flex-direction: column; }
+            .cerebro-grid { grid-template-columns: 1fr 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .historial-item { flex-wrap: wrap; gap: 4px; }
+            .pagination-controls { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div class="header">
+        <div class="header-top">
+            <div>
+                <h1>🌐 Quantum <span>Web Search</span></h1>
+                <div class="sub">🔍 Grover + 🧠 Cerebro Cuántico Integrado</div>
+            </div>
+            <div class="header-actions">
+                <span id="wsStatus" style="font-size:12px; color:#22c55e;">🟢 En vivo</span>
+                <button onclick="toggleModo()" id="modoBtn">🌓 Modo</button>
+                <button onclick="toggleHistorial()">📜 Historial</button>
+                <button onclick="toggleDashboard()">📊 Dashboard</button>
+                <button onclick="exportarResultados('json')">📄 JSON</button>
+                <button onclick="exportarResultados('pdf')">📑 PDF</button>
+                <button onclick="openAuth()">🔑 Login</button>
+            </div>
+        </div>
+        <div class="badges">
+            <span class="badge grover">⚡ Grover</span>
+            <span class="badge cerebro">🧠 Cerebro</span>
+            <span class="badge qrng">🎲 QRNG</span>
+            <span class="badge bell">🔗 Bell</span>
+            <span class="badge vqe">⚗️ VQE</span>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    MODO INDICADOR
+    ============================================================ -->
+    <div id="modeIndicator" class="mode-indicator mode-grover">🔍 Modo: Grover</div>
+
+    <!-- ============================================================
+    BUSCADOR
+    ============================================================ -->
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Busca en internet..." autofocus>
+        <button class="btn-search" id="searchBtn">🔍 Buscar</button>
+        <button class="btn-cerebro" id="cerebroBtn">🧠 Cerebro</button>
+    </div>
+
+    <!-- ============================================================
+    PAGINACIÓN
+    ============================================================ -->
+    <div class="pagination-controls">
+        <label style="font-size:13px; color:#a1a1aa;">📊 Resultados por página:</label>
+        <select id="resultsPerPage">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+        <span style="font-size:13px; color:#a1a1aa; margin-left:auto;" id="paginationInfo">Página 1 de 1</span>
+        <div style="display:flex; gap:4px;">
+            <button id="prevPageBtn">◀</button>
+            <button id="nextPageBtn">▶</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    HISTORIAL
+    ============================================================ -->
+    <div class="historial-section" id="historialSection">
+        <h3>📜 Historial de búsquedas</h3>
+        <div id="historialList"><p style="color:#71717a; font-size:14px;">Cargando...</p></div>
+    </div>
+
+    <!-- ============================================================
+    DASHBOARD
+    ============================================================ -->
+    <div class="dashboard-section" id="dashboardSection">
+        <h3>📊 Dashboard de estadísticas</h3>
+        <div class="dashboard-grid" id="dashboardGrid">
+            <div class="dashboard-card"><div class="value" id="dashTotal">0</div><div class="label">Total búsquedas</div></div>
+            <div class="dashboard-card"><div class="value" id="dashPromedio">0</div><div class="label">Promedio resultados</div></div>
+            <div class="dashboard-card"><div class="value" id="dashTiempo">0s</div><div class="label">Tiempo promedio</div></div>
+            <div class="dashboard-card"><div class="value" id="dashAlgoritmos">0</div><div class="label">Algoritmos usados</div></div>
+        </div>
+        <div id="dashboardAlgoritmos" style="font-size:13px; color:#a1a1aa;"></div>
+    </div>
+
+    <!-- ============================================================
+    STATS
+    ============================================================ -->
+    <div id="statsBar"></div>
+
+    <!-- ============================================================
+    RESULTADOS
+    ============================================================ -->
+    <div id="results">
+        <div class="no-results">🔍 Busca algo para ver resultados</div>
+    </div>
+
+    <!-- ============================================================
+    CACHE INFO
+    ============================================================ -->
+    <div class="cache-info" id="cacheInfo">💾 Caché cuántico activo | ⚡ Grover | 🧠 Cerebro</div>
+</div>
+
+<!-- ============================================================
+MODAL DE AUTENTICACIÓN
+============================================================ -->
+<div class="modal" id="authModal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeAuth()">&times;</span>
+        <h2 id="authTitle">Iniciar Sesión</h2>
+        <input id="authEmail" type="email" placeholder="Email">
+        <input id="authNombre" type="text" placeholder="Nombre" style="display:none;">
+        <input id="authPassword" type="password" placeholder="Contraseña">
+        <button class="btn-primary" id="authSubmitBtn" onclick="authSubmit()">Iniciar Sesión</button>
+        <div style="text-align:center; margin-top:12px; font-size:13px; opacity:0.6;">
+            <a href="#" onclick="toggleAuthMode()" id="authToggleLink" style="color:#a78bfa;">¿Crear cuenta?</a>
+            <span style="margin:0 8px;">|</span>
+            <a href="#" onclick="closeAuth()" style="color:#71717a;">Cerrar</a>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+SCRIPTS
+============================================================ -->
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script>
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+let resultadosActuales = [];
+let resultadosTotales = [];
+let paginaActual = 1;
+let resultadosPorPagina = 25;
+let isProcessing = false;
+let modoActual = 'grover';
+let authMode = 'login';
+let socket = null;
+let timeoutId = null;
+
+// ============================================================
+// ELEMENTOS DOM
+// ============================================================
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const cerebroBtn = document.getElementById('cerebroBtn');
+const resultsDiv = document.getElementById('results');
+const statsBar = document.getElementById('statsBar');
+const cacheInfo = document.getElementById('cacheInfo');
+const modeIndicator = document.getElementById('modeIndicator');
+const historialSection = document.getElementById('historialSection');
+const historialList = document.getElementById('historialList');
+const dashboardSection = document.getElementById('dashboardSection');
+const wsStatus = document.getElementById('wsStatus');
+
+// ============================================================
+// MODO OSCURO/CLARO
+// ============================================================
+function toggleModo() {
+    const body = document.body;
+    if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+        localStorage.setItem('modo', 'light');
+    } else {
+        body.classList.remove('light-mode');
+        body.classList.add('dark-mode');
+        localStorage.setItem('modo', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modo = localStorage.getItem('modo') || 'dark';
+    document.body.classList.add(modo === 'dark' ? 'dark-mode' : 'light-mode');
+});
+
+// ============================================================
+// WEBSOCKET - BÚSQUEDA EN TIEMPO REAL
+// ============================================================
+function conectarWebSocket() {
+    try {
+        socket = io();
+        
+        socket.on('connect', function() {
+            wsStatus.textContent = '🟢 En vivo';
+            wsStatus.style.color = '#22c55e';
+        });
+        
+        socket.on('disconnect', function() {
+            wsStatus.textContent = '🔴 Sin conexión';
+            wsStatus.style.color = '#ef4444';
+        });
+        
+        socket.on('resultados_tiempo_real', function(data) {
+            if (data.resultados && data.resultados.length > 0) {
+                mostrarResultadosInstantaneos(data.resultados);
+            }
+        });
+        
+        socket.on('error', function(data) {
+            console.error('Error WebSocket:', data.mensaje);
+        });
+        
+    } catch (e) {
+        console.error('Error conectando WebSocket:', e);
+    }
+}
+
+function mostrarResultadosInstantaneos(resultados) {
+    const container = document.createElement('div');
+    container.id = 'resultadosInstantaneos';
+    let html = '<div style="font-size:13px; color:#a78bfa; margin-bottom:8px;">⚡ Resultados en tiempo real:</div>';
+    resultados.slice(0, 3).forEach((r, i) => {
+        html += `<div style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">${i+1}. ${r.titulo || 'Sin título'}</div>`;
+    });
+    if (resultados.length > 3) {
+        html += `<div style="font-size:11px; color:#71717a; margin-top:6px;">+ ${resultados.length - 3} más...</div>`;
+    }
+    container.innerHTML = html;
+    
+    const oldContainer = document.getElementById('resultadosInstantaneos');
+    if (oldContainer) oldContainer.remove();
+    const statsBar = document.getElementById('statsBar');
+    statsBar.parentNode.insertBefore(container, statsBar.nextSibling);
+    
+    setTimeout(() => {
+        const el = document.getElementById('resultadosInstantaneos');
+        if (el) el.remove();
+    }, 5000);
+}
+
+// ============================================================
+// BUSCAR (GROVER)
+// ============================================================
+async function buscar() {
+    const query = searchInput.value.trim();
+    if (!query) {
+        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe algo para buscar</div>';
+        return;
+    }
+
+    if (isProcessing) return;
+    isProcessing = true;
+    searchBtn.disabled = true;
+    cerebroBtn.disabled = true;
+    searchBtn.textContent = '⏳ Buscando...';
+    modoActual = 'grover';
+    modeIndicator.textContent = '🔍 Modo: Grover';
+    modeIndicator.className = 'mode-indicator mode-grover';
+
+    resultsDiv.innerHTML = `<div class="loading"><div class="spinner"></div><div>🔍 Buscando con Grover...</div></div>`;
+    cacheInfo.textContent = '⏳ Buscando...';
+
+    try {
+        const res = await fetch('/api/buscar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, max_resultados: 100, resultados_web: 50 })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+            cacheInfo.textContent = '⚠️ Error en búsqueda';
+            return;
+        }
+
+        if (!data.resultados || data.resultados.length === 0) {
+            resultsDiv.innerHTML = '<div class="no-results">❌ No se encontraron resultados</div>';
+            cacheInfo.textContent = '💾 Caché cuántico activo';
+            return;
+        }
+
+        resultadosActuales = data.resultados;
+        resultadosTotales = data.resultados;
+        paginaActual = 1;
+        mostrarPagina(paginaActual);
+
+        statsBar.innerHTML = `
+            <div class="stats-bar">
+                <div class="stat">📊 <strong>${data.mostrados || 0}</strong> resultados</div>
+                <div class="stat">🌐 <strong>${data.total_encontrados || 0}</strong> encontrados</div>
+                <div class="stat">⏱️ <strong>${data.tiempo?.toFixed(2) || 0}s</strong></div>
+                <div class="stat">🌀 <strong>Grover</strong></div>
+            </div>
+        `;
+
+        cacheInfo.textContent = '💾 Caché cuántico activo | ⚡ Grover aplicado';
+        cargarHistorial();
+        cargarDashboard();
+
+    } catch (e) {
+        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
+        cacheInfo.textContent = '⚠️ Error en la búsqueda';
+    }
+
+    isProcessing = false;
+    searchBtn.disabled = false;
+    cerebroBtn.disabled = false;
+    searchBtn.textContent = '🔍 Buscar';
+}
+
+// ============================================================
+// PAGINACIÓN
+// ============================================================
+function mostrarPagina(pagina) {
+    const inicio = (pagina - 1) * resultadosPorPagina;
+    const fin = inicio + resultadosPorPagina;
+    const paginaResultados = resultadosTotales.slice(inicio, fin);
+    
+    const totalPaginas = Math.ceil(resultadosTotales.length / resultadosPorPagina);
+    document.getElementById('paginationInfo').textContent = `Página ${pagina} de ${totalPaginas || 1}`;
+    
+    if (paginaResultados.length === 0) {
+        resultsDiv.innerHTML = '<div class="no-results">No hay más resultados</div>';
+        return;
+    }
+    
+    let html = '';
+    paginaResultados.forEach((r, i) => {
+        const relevancia = r.relevancia || 0;
+        const estrellas = '⭐'.repeat(Math.min(Math.floor(relevancia / 2), 5));
+        const titulo = r.titulo || 'Sin título';
+        const descripcion = r.descripcion || 'Sin descripción';
+        const url = r.url || '#';
+        const num = inicio + i + 1;
+        
+        html += `
+            <div class="result-card">
+                <div class="title"><a href="${url}" target="_blank" rel="noopener">${num}. ${titulo}</a></div>
+                <div class="desc">${descripcion}</div>
+                <div class="meta">
+                    <span class="relevance">📊 ${relevancia}</span>
+                    <span class="stars">${estrellas}</span>
+                    <span>${r.fuente || 'Web'}</span>
+                </div>
+                <div class="url">🔗 ${url}</div>
+            </div>
+        `;
+    });
+    
+    resultsDiv.innerHTML = html;
+    document.getElementById('prevPageBtn').disabled = pagina <= 1;
+    document.getElementById('nextPageBtn').disabled = pagina >= totalPaginas;
+}
+
+function cambiarPagina(delta) {
+    const totalPaginas = Math.ceil(resultadosTotales.length / resultadosPorPagina);
+    const nuevaPagina = paginaActual + delta;
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+    paginaActual = nuevaPagina;
+    mostrarPagina(paginaActual);
+}
+
+document.getElementById('resultsPerPage').addEventListener('change', function() {
+    resultadosPorPagina = parseInt(this.value);
+    paginaActual = 1;
+    mostrarPagina(paginaActual);
+});
+
+document.getElementById('prevPageBtn').addEventListener('click', () => cambiarPagina(-1));
+document.getElementById('nextPageBtn').addEventListener('click', () => cambiarPagina(1));
+
+// ============================================================
+// CEREBRO CUÁNTICO
+// ============================================================
+async function ejecutarCerebro() {
+    const query = searchInput.value.trim();
+    if (!query) {
+        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe algo para procesar</div>';
+        return;
+    }
+
+    if (isProcessing) return;
+    isProcessing = true;
+    searchBtn.disabled = true;
+    cerebroBtn.disabled = true;
+    cerebroBtn.textContent = '⏳ Procesando...';
+    modoActual = 'cerebro';
+    modeIndicator.textContent = '🧠 Modo: Cerebro Cuántico';
+    modeIndicator.className = 'mode-indicator mode-cerebro';
+
+    resultsDiv.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            <div>🧠 Procesando con TODOS los algoritmos cuánticos...</div>
+            <div style="font-size:12px; opacity:0.6; margin-top:8px;">QRNG + Grover + Bell + Teleport + VQE + DJ + BV</div>
+        </div>
+    `;
+    cacheInfo.textContent = '🧠 Procesando con el Cerebro...';
+
+    try {
+        const res = await fetch('/api/cerebro', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+            cacheInfo.textContent = '⚠️ Error en cerebro';
+            return;
+        }
+
+        statsBar.innerHTML = `<div class="stats-bar"><div class="stat">🧠 <strong>Cerebro Cuántico</strong></div><div class="stat">⚡ <strong>Todos los algoritmos</strong></div></div>`;
+
+        let html = `
+            <div class="cerebro-result">
+                <h3>🧠 Resultado del Cerebro Cuántico</h3>
+                <div class="cerebro-grid">
+                    <div class="cerebro-card"><div class="value">${data.id || 'N/A'}</div><div class="label">🎲 ID único (QRNG)</div></div>
+                    <div class="cerebro-card"><div class="value ${data.seguridad?.encriptada ? 'green' : 'red'}">${data.seguridad?.encriptada ? '🔒 Sí' : '🔓 No'}</div><div class="label">🔗 Encriptación (Bell)</div></div>
+                    <div class="cerebro-card"><div class="value yellow">${data.tendencias?.cadena_encontrada || 'N/A'}</div><div class="label">🔐 Patrón (Bernstein-Vazirani)</div></div>
+                    <div class="cerebro-card"><div class="value blue">${(data.seguridad?.fidelidad * 100).toFixed(1) || '0'}%</div><div class="label">📡 Fidelidad (Teleportación)</div></div>
+                </div>
+        `;
+
+        if (data.optimizacion && data.optimizacion.length > 0) {
+            html += `
+                <div style="margin-top:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px;">
+                    <div style="font-size:13px; opacity:0.7;">⚗️ Optimización de palabras (VQE):</div>
+                    <div class="cerebro-tags">`;
+            data.optimizacion.forEach(opt => {
+                html += `<span class="cerebro-tag">${opt.palabra}: ${opt.energia?.toFixed(4) || '0'} Ha</span>`;
+            });
+            html += `</div></div>`;
+        }
+
+        if (data.resultados_busqueda?.estado_encontrado) {
+            html += `
+                <div class="cerebro-grover">
+                    🔍 <strong>Grover:</strong> Elemento encontrado: <strong>${data.resultados_busqueda.estado_encontrado}</strong>
+                    (${(data.resultados_busqueda.tasa_exito * 100).toFixed(1)}% éxito)
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+        resultsDiv.innerHTML = html;
+        cacheInfo.textContent = '🧠 Cerebro completado | Todos los algoritmos aplicados';
+        cargarHistorial();
+
+    } catch (e) {
+        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
+        cacheInfo.textContent = '⚠️ Error en cerebro';
+    }
+
+    isProcessing = false;
+    searchBtn.disabled = false;
+    cerebroBtn.disabled = false;
+    cerebroBtn.textContent = '🧠 Cerebro';
+}
+
+// ============================================================
+// HISTORIAL
+// ============================================================
+async function cargarHistorial() {
+    try {
+        const res = await fetch('/api/historial');
+        const data = await res.json();
+        if (data.error) return;
+        if (data.length === 0) {
+            historialList.innerHTML = '<p style="color:#71717a; font-size:14px;">No hay búsquedas guardadas.</p>';
+            return;
+        }
+        let html = '';
+        data.forEach(h => {
+            const fecha = new Date(h.fecha).toLocaleString();
+            html += `<div class="historial-item"><span class="query">🔍 ${h.query}</span><span class="algo">${h.algoritmo}</span><span class="fecha">${fecha}</span></div>`;
+        });
+        historialList.innerHTML = html;
+    } catch (e) {
+        historialList.innerHTML = '<p style="color:#71717a; font-size:14px;">Error cargando historial.</p>';
+    }
+}
+
+function toggleHistorial() {
+    const section = document.getElementById('historialSection');
+    section.classList.toggle('show');
+    if (section.classList.contains('show')) cargarHistorial();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function cargarDashboard() {
+    try {
+        const res = await fetch('/api/estadisticas_db');
+        const data = await res.json();
+        if (data.error) return;
+        document.getElementById('dashTotal').textContent = data.total_busquedas || 0;
+        document.getElementById('dashPromedio').textContent = data.promedio_resultados || 0;
+        document.getElementById('dashTiempo').textContent = (data.tiempo_promedio || 0).toFixed(2) + 's';
+        document.getElementById('dashAlgoritmos').textContent = data.algoritmos_mas_usados?.length || 0;
+        if (data.algoritmos_mas_usados && data.algoritmos_mas_usados.length > 0) {
+            let html = '🏷️ Algoritmos usados: ';
+            data.algoritmos_mas_usados.forEach(a => {
+                html += `<span style="display:inline-block; padding:2px 10px; border-radius:8px; background:#7c3aed; color:white; font-size:12px; margin:2px;">${a[0]} (${a[1]})</span>`;
+            });
+            document.getElementById('dashboardAlgoritmos').innerHTML = html;
+        }
+    } catch (e) {
+        document.getElementById('dashboardAlgoritmos').textContent = 'Error cargando dashboard.';
+    }
+}
+
+function toggleDashboard() {
+    const section = document.getElementById('dashboardSection');
+    section.classList.toggle('show');
+    if (section.classList.contains('show')) cargarDashboard();
+}
+
+// ============================================================
+// EXPORTACIÓN
+// ============================================================
+async function exportarResultados(formato) {
+    if (!resultadosActuales || resultadosActuales.length === 0) {
+        alert('No hay resultados para exportar. Realiza una búsqueda primero.');
+        return;
+    }
+    try {
+        const res = await fetch('/api/exportar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ formato, resultados: resultadosActuales })
+        });
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `resultados.${formato}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } else {
+            const error = await res.json();
+            alert('Error al exportar: ' + (error.error || 'Desconocido'));
+        }
+    } catch (e) {
+        alert('Error: ' + e.message);
+    }
+}
+
+// ============================================================
+// AUTENTICACIÓN
+// ============================================================
+function openAuth() {
+    document.getElementById('authModal').classList.add('show');
+}
+function closeAuth() {
+    document.getElementById('authModal').classList.remove('show');
+}
+function toggleAuthMode() {
+    authMode = authMode === 'login' ? 'register' : 'login';
+    document.getElementById('authTitle').textContent = authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta';
+    document.getElementById('authNombre').style.display = authMode === 'register' ? 'block' : 'none';
+    document.getElementById('authSubmitBtn').textContent = authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta';
+    document.getElementById('authToggleLink').textContent = authMode === 'login' ? '¿Crear cuenta?' : '¿Ya tienes cuenta?';
+}
+
+async function authSubmit() {
+    const email = document.getElementById('authEmail').value.trim();
+    const nombre = document.getElementById('authNombre').value.trim();
+    const password = document.getElementById('authPassword').value.trim();
+    if (!email || !password) { alert('Email y contraseña son obligatorios'); return; }
+    if (authMode === 'register' && !nombre) { alert('El nombre es obligatorio'); return; }
+    const endpoint = authMode === 'login' ? '/api/login' : '/api/registrar';
+    const data = authMode === 'login' ? { email, password } : { email, nombre, password };
+    try {
+        const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const result = await res.json();
+        if (result.error) { alert(result.error); return; }
+        if (result.token) {
+            alert('¡Bienvenido ' + result.usuario.nombre + '!');
+            closeAuth();
+        } else if (result.mensaje) {
+            alert(result.mensaje);
+            authMode = 'login';
+            toggleAuthMode();
+        }
+    } catch (e) { alert('Error: ' + e.message); }
+}
+
+// ============================================================
+// WEBSOCKET - BÚSQUEDA EN TIEMPO REAL (al escribir)
+// ============================================================
+searchInput.addEventListener('input', function() {
+    const query = this.value.trim();
+    if (query.length >= 3 && socket && socket.connected) {
+        wsStatus.textContent = '⏳ Buscando...';
+        wsStatus.style.color = '#fbbf24';
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            socket.emit('buscar_tiempo_real', { query: query });
+        }, 500);
+    } else if (query.length < 3) {
+        wsStatus.textContent = '🟢 En vivo';
+        wsStatus.style.color = '#22c55e';
+    }
+});
+
+// ============================================================
+// EVENTOS PRINCIPALES
+// ============================================================
+searchBtn.addEventListener('click', buscar);
+cerebroBtn.addEventListener('click', ejecutarCerebro);
+searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        if (modoActual === 'cerebro') ejecutarCerebro();
+        else buscar();
+    }
+});
+
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
+conectarWebSocket();
+cargarHistorial();
+cargarDashboard();
+searchInput.focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+    "version": "2.0",
+    "caché_activo": true,
+    "grover_iteraciones_base": 3,
+    "max_resultados": 10,
+    "dominios_confiables": [
+        "wikipedia.org",
+        "google.com",
+        "youtube.com",
+        "github.com"
+    ],
+    "palabras_clave_prioritarias": [
+        "guía",
+        "tutorial",
+        "oficial",
+        "documentación"
+    ]
+}
