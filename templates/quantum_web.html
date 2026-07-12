@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌐 Quantum Web Search</title>
     <style>
+        /* ============================================================
+           RESET Y BASE
+           ============================================================ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -13,77 +16,217 @@
             justify-content: center;
             align-items: flex-start;
             padding: 20px;
-            transition: background 0.3s, color 0.3s;
+            transition: background 0.5s ease, color 0.5s ease;
         }
+
+        /* ============================================================
+           MODO OSCURO
+           ============================================================ */
         body.dark-mode {
             background: #0a0a0f;
             color: #e4e4e7;
         }
-        body.dark-mode .header { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
         body.dark-mode .header h1 span { color: #a78bfa; }
-        body.dark-mode .search-box input { background: #1a1a26; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
+        body.dark-mode .search-box input {
+            background: #1a1a26;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e4e4e7;
+        }
         body.dark-mode .search-box input:focus { border-color: #7c3aed; }
-        body.dark-mode .result-card { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .result-card {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+        body.dark-mode .result-card:hover {
+            border-color: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(124,58,237,0.15);
+        }
         body.dark-mode .result-card .title a { color: #a78bfa; }
         body.dark-mode .result-card .desc { color: #a1a1aa; }
         body.dark-mode .result-card .meta { color: #71717a; }
         body.dark-mode .result-card .url { color: #52525b; }
-        body.dark-mode .stats-bar .stat { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #a1a1aa; }
+        body.dark-mode .stats-bar .stat {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #a1a1aa;
+        }
         body.dark-mode .stats-bar .stat strong { color: #e4e4e7; }
-        body.dark-mode .no-results { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #71717a; }
-        body.dark-mode .loading { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #71717a; }
-        body.dark-mode .error { background: #12121a; border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
-        body.dark-mode .cerebro-result { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .no-results {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #71717a;
+        }
+        body.dark-mode .loading {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #71717a;
+        }
+        body.dark-mode .error {
+            background: #12121a;
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #f87171;
+        }
+        body.dark-mode .cerebro-result {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
         body.dark-mode .cerebro-card { background: rgba(255,255,255,0.03); }
         body.dark-mode .cerebro-card .label { color: #71717a; }
-        body.dark-mode .cerebro-tag { background: rgba(124,58,237,0.15); color: #a78bfa; }
+        body.dark-mode .cerebro-tag {
+            background: rgba(124,58,237,0.15);
+            color: #a78bfa;
+        }
         body.dark-mode .cache-info { color: #52525b; }
-        body.dark-mode .historial-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .historial-item {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
         body.dark-mode .dashboard-card { background: rgba(255,255,255,0.03); }
         body.dark-mode .dashboard-card .label { color: #71717a; }
-        body.dark-mode .modal-content { background: #1a1a2e; border: 1px solid rgba(255,255,255,0.05); }
-        body.dark-mode .modal-content input { background: #12121a; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
-        body.dark-mode .pagination-controls select { background: #1a1a26; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
-        body.dark-mode #resultadosInstantaneos { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .modal-content {
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        body.dark-mode .modal-content input {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e4e4e7;
+        }
+        body.dark-mode .pagination-controls select {
+            background: #1a1a26;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e4e4e7;
+        }
+        body.dark-mode #resultadosInstantaneos {
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
 
+        /* ============================================================
+           MODO CLARO
+           ============================================================ */
         body.light-mode {
             background: #f0f0f5;
             color: #1a1a2e;
         }
-        body.light-mode .header { background: linear-gradient(135deg, #e8e8f0, #d5d5e0); border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .header {
+            background: linear-gradient(135deg, #e8e8f0, #d5d5e0);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
         body.light-mode .header h1 span { color: #4f46e5; }
-        body.light-mode .search-box input { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
+        body.light-mode .search-box input {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.1);
+            color: #1a1a2e;
+        }
         body.light-mode .search-box input:focus { border-color: #4f46e5; }
-        body.light-mode .result-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .result-card {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        body.light-mode .result-card:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(79,70,229,0.12);
+        }
         body.light-mode .result-card .title a { color: #4f46e5; }
         body.light-mode .result-card .desc { color: #4a4a5a; }
         body.light-mode .result-card .meta { color: #6a6a7a; }
         body.light-mode .result-card .url { color: #8a8a9a; }
-        body.light-mode .stats-bar .stat { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
+        body.light-mode .stats-bar .stat {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            color: #4a4a5a;
+        }
         body.light-mode .stats-bar .stat strong { color: #1a1a2e; }
-        body.light-mode .no-results { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
-        body.light-mode .loading { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
-        body.light-mode .error { background: #ffffff; border: 1px solid rgba(239,68,68,0.2); color: #dc2626; }
-        body.light-mode .cerebro-result { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .no-results {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            color: #4a4a5a;
+        }
+        body.light-mode .loading {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+            color: #4a4a5a;
+        }
+        body.light-mode .error {
+            background: #ffffff;
+            border: 1px solid rgba(239,68,68,0.2);
+            color: #dc2626;
+        }
+        body.light-mode .cerebro-result {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
         body.light-mode .cerebro-card { background: rgba(0,0,0,0.03); }
         body.light-mode .cerebro-card .label { color: #6a6a7a; }
-        body.light-mode .cerebro-tag { background: rgba(79,70,229,0.1); color: #4f46e5; }
+        body.light-mode .cerebro-tag {
+            background: rgba(79,70,229,0.1);
+            color: #4f46e5;
+        }
         body.light-mode .cache-info { color: #6a6a7a; }
-        body.light-mode .historial-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .historial-item {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
         body.light-mode .dashboard-card { background: rgba(0,0,0,0.03); }
         body.light-mode .dashboard-card .label { color: #6a6a7a; }
-        body.light-mode .modal-content { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
-        body.light-mode .modal-content input { background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
-        body.light-mode .pagination-controls select { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
-        body.light-mode #resultadosInstantaneos { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .modal-content {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        body.light-mode .modal-content input {
+            background: #f5f5f7;
+            border: 1px solid rgba(0,0,0,0.1);
+            color: #1a1a2e;
+        }
+        body.light-mode .pagination-controls select {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.1);
+            color: #1a1a2e;
+        }
+        body.light-mode #resultadosInstantaneos {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
 
-        .container { max-width: 1000px; width: 100%; }
+        /* ============================================================
+           CONTENEDOR PRINCIPAL
+           ============================================================ */
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
         .header {
             border-radius: 16px;
             padding: 20px 30px;
             margin-bottom: 20px;
             text-align: center;
-            transition: background 0.3s, border 0.3s;
+            transition: background 0.4s ease, border 0.4s ease, transform 0.3s ease;
+        }
+        .header:hover {
+            transform: scale(1.005);
         }
         .header-top {
             display: flex;
@@ -92,21 +235,42 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .header h1 { font-size: 28px; }
-        .header .sub { font-size: 14px; margin-top: 4px; opacity: 0.7; }
-        .header .badges {
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header h1 span {
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .sub {
+            font-size: 14px;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        /* ============================================================
+           BADGES
+           ============================================================ */
+        .badges {
             margin-top: 8px;
             display: flex;
             justify-content: center;
             gap: 8px;
             flex-wrap: wrap;
         }
-        .header .badge {
+        .badge {
             display: inline-block;
             padding: 2px 14px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .badge:hover {
+            transform: scale(1.08);
         }
         .badge.grover { background: #7c3aed; color: white; }
         .badge.cerebro { background: #059669; color: white; }
@@ -117,6 +281,9 @@
         .badge.shor { background: #dc2626; color: white; }
         .badge.qaoa { background: #f59e0b; color: black; }
 
+        /* ============================================================
+           HEADER ACTIONS
+           ============================================================ */
         .header-actions {
             display: flex;
             gap: 8px;
@@ -131,17 +298,31 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
-        .header-actions button:hover { background: rgba(255,255,255,0.1); color: #e4e4e7; }
+        .header-actions button:hover {
+            background: rgba(255,255,255,0.12);
+            color: #e4e4e7;
+            transform: scale(1.05);
+        }
         body.light-mode .header-actions button {
-            background: rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.08);
             color: #4a4a5a;
         }
-        body.light-mode .header-actions button:hover { background: rgba(0,0,0,0.1); }
+        body.light-mode .header-actions button:hover {
+            background: rgba(0,0,0,0.08);
+            color: #1a1a2e;
+        }
 
-        #wsStatus { font-size:12px; }
+        #wsStatus {
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+
+        /* ============================================================
+           SEARCH BOX
+           ============================================================ */
         .search-box {
             display: flex;
             gap: 10px;
@@ -154,8 +335,12 @@
             border-radius: 12px;
             font-size: 16px;
             outline: none;
-            transition: border-color 0.3s, background 0.3s, color 0.3s;
+            transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
             min-width: 200px;
+        }
+        .search-box input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
         }
         .search-box button {
             padding: 14px 24px;
@@ -165,17 +350,41 @@
             font-weight: 600;
             cursor: pointer;
             font-size: 15px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             white-space: nowrap;
+            position: relative;
+            overflow: hidden;
         }
-        .search-box button:hover { transform: scale(1.02); }
-        .search-box button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .search-box button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .search-box button:hover::after {
+            opacity: 1;
+        }
+        .search-box button:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+        }
+        .search-box button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         .btn-search { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
         .btn-cerebro { background: linear-gradient(135deg, #7c3aed, #059669); }
         .btn-multi { background: linear-gradient(135deg, #d97706, #059669); }
         .btn-shor { background: linear-gradient(135deg, #dc2626, #7c3aed); }
         .btn-qaoa { background: linear-gradient(135deg, #f59e0b, #ef4444); }
 
+        /* ============================================================
+           PAGINACIÓN
+           ============================================================ */
         .pagination-controls {
             display: flex;
             gap: 12px;
@@ -188,7 +397,7 @@
             border-radius: 8px;
             font-size: 13px;
             outline: none;
-            transition: background 0.3s, border 0.3s, color 0.3s;
+            transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
         }
         .pagination-controls button {
             background: rgba(255,255,255,0.05);
@@ -198,11 +407,20 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
-        .pagination-controls button:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
-        .pagination-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .pagination-controls button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.12);
+            transform: scale(1.05);
+        }
+        .pagination-controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
 
+        /* ============================================================
+           MODO INDICADOR
+           ============================================================ */
         .mode-indicator {
             display: inline-block;
             padding: 4px 16px;
@@ -210,6 +428,11 @@
             font-size: 13px;
             font-weight: 600;
             margin-bottom: 12px;
+            animation: pulseMode 2s ease-in-out infinite;
+        }
+        @keyframes pulseMode {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         .mode-grover { background: rgba(124,58,237,0.2); color: #a78bfa; }
         .mode-cerebro { background: rgba(5,150,105,0.2); color: #22c55e; }
@@ -222,6 +445,9 @@
         body.light-mode .mode-shor { background: rgba(220,38,38,0.1); color: #dc2626; }
         body.light-mode .mode-qaoa { background: rgba(245,158,11,0.1); color: #d97706; }
 
+        /* ============================================================
+           STATS BAR
+           ============================================================ */
         .stats-bar {
             display: flex;
             gap: 12px;
@@ -232,20 +458,39 @@
             padding: 6px 14px;
             border-radius: 8px;
             font-size: 13px;
-            transition: background 0.3s, border 0.3s, color 0.3s;
+            transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
         }
 
+        /* ============================================================
+           RESULT CARDS
+           ============================================================ */
         .result-card {
             border-radius: 12px;
             padding: 14px 18px;
             margin-bottom: 10px;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .result-card:hover { border-color: #7c3aed !important; }
-        .result-card .title { font-size: 17px; font-weight: 600; }
-        .result-card .title a { text-decoration: none; }
-        .result-card .title a:hover { text-decoration: underline; }
-        .result-card .desc { font-size: 14px; margin: 4px 0; line-height: 1.5; }
+        .result-card:hover {
+            border-color: #7c3aed !important;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(124,58,237,0.15);
+        }
+        .result-card .title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+        .result-card .title a {
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .result-card .title a:hover {
+            text-decoration: underline;
+        }
+        .result-card .desc {
+            font-size: 14px;
+            margin: 4px 0;
+            line-height: 1.5;
+        }
         .result-card .meta {
             display: flex;
             flex-wrap: wrap;
@@ -260,6 +505,10 @@
             background: #7c3aed;
             color: white;
             font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        .result-card .meta .relevance:hover {
+            transform: scale(1.05);
         }
         .result-card .meta .stars { color: #fbbf24; }
         .result-card .meta .source {
@@ -268,15 +517,35 @@
             border-radius: 8px;
             font-size: 10px;
         }
-        .result-card .url { font-size: 12px; margin-top: 4px; word-break: break-all; }
+        .result-card .url {
+            font-size: 12px;
+            margin-top: 4px;
+            word-break: break-all;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        .result-card .url:hover {
+            opacity: 1;
+        }
 
+        /* ============================================================
+           CEREBRO RESULT
+           ============================================================ */
         .cerebro-result {
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
-            transition: background 0.3s, border 0.3s;
+            transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.5s ease-out;
         }
-        .cerebro-result h3 { color: #a78bfa; margin-bottom: 8px; font-size: 18px; }
+        .cerebro-result:hover {
+            box-shadow: 0 4px 20px rgba(124,58,237,0.08);
+        }
+        .cerebro-result h3 {
+            color: #a78bfa;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
         body.light-mode .cerebro-result h3 { color: #4f46e5; }
         .cerebro-grid {
             display: grid;
@@ -288,48 +557,118 @@
             padding: 12px;
             border-radius: 8px;
             text-align: center;
-            transition: background 0.3s;
+            transition: background 0.3s ease, transform 0.3s ease;
         }
-        .cerebro-card .value { font-size: 22px; font-weight: 700; color: #a78bfa; }
+        .cerebro-card:hover {
+            transform: scale(1.03);
+        }
+        .cerebro-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #a78bfa;
+        }
         body.light-mode .cerebro-card .value { color: #4f46e5; }
         .cerebro-card .value.green { color: #22c55e; }
         .cerebro-card .value.yellow { color: #fbbf24; }
         .cerebro-card .value.blue { color: #60a5fa; }
-        .cerebro-card .label { font-size: 11px; margin-top: 4px; }
-        .cerebro-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-        .cerebro-tag { padding: 4px 12px; border-radius: 12px; font-size: 13px; transition: background 0.3s, color 0.3s; }
-        .cerebro-grover { margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 14px; color: #a1a1aa; }
-        body.light-mode .cerebro-grover { background: rgba(0,0,0,0.03); color: #4a4a5a; }
+        .cerebro-card .label {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        .cerebro-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .cerebro-tag {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+        }
+        .cerebro-tag:hover {
+            transform: scale(1.05);
+        }
+        .cerebro-grover {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #a1a1aa;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        body.light-mode .cerebro-grover {
+            background: rgba(0,0,0,0.03);
+            color: #4a4a5a;
+        }
         .cerebro-grover strong { color: #a78bfa; }
         body.light-mode .cerebro-grover strong { color: #4f46e5; }
 
+        /* ============================================================
+           SHOR RESULT
+           ============================================================ */
         .shor-result {
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
             border: 1px solid rgba(220,38,38,0.3);
             background: rgba(220,38,38,0.05);
+            animation: fadeInUp 0.5s ease-out;
         }
-        .shor-result h3 { color: #f87171; margin-bottom: 8px; font-size: 18px; }
-        .shor-result .numero { font-size: 32px; font-weight: 700; color: #a78bfa; text-align: center; }
-        .shor-result .factorizacion { font-size: 24px; text-align: center; margin: 8px 0; }
-        .shor-result .factorizacion .factores { color: #22c55e; font-weight: 700; }
+        .shor-result h3 {
+            color: #f87171;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        .shor-result .numero {
+            font-size: 32px;
+            font-weight: 700;
+            color: #a78bfa;
+            text-align: center;
+        }
+        .shor-result .factorizacion {
+            font-size: 24px;
+            text-align: center;
+            margin: 8px 0;
+        }
+        .shor-result .factorizacion .factores {
+            color: #22c55e;
+            font-weight: 700;
+        }
 
+        /* ============================================================
+           QAOA RESULT
+           ============================================================ */
         .qaoa-result {
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
             border: 1px solid rgba(245,158,11,0.3);
             background: rgba(245,158,11,0.05);
+            animation: fadeInUp 0.5s ease-out;
         }
-        .qaoa-result h3 { color: #fbbf24; margin-bottom: 8px; font-size: 18px; }
-        .qaoa-result .valor { font-size: 24px; font-weight: 700; color: #22c55e; text-align: center; }
+        .qaoa-result h3 {
+            color: #fbbf24;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        .qaoa-result .valor {
+            font-size: 24px;
+            font-weight: 700;
+            color: #22c55e;
+            text-align: center;
+        }
 
+        /* ============================================================
+           LOADING, NO RESULTS, ERROR
+           ============================================================ */
         .loading, .no-results, .error {
             text-align: center;
             padding: 40px 20px;
             border-radius: 12px;
-            transition: background 0.3s, border 0.3s, color 0.3s;
+            transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
         }
         .loading .spinner {
             display: inline-block;
@@ -347,24 +686,36 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ============================================================
+           CACHE INFO
+           ============================================================ */
         .cache-info {
             font-size: 12px;
             text-align: center;
             margin-top: 12px;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
         }
 
+        /* ============================================================
+           DASHBOARD
+           ============================================================ */
         .dashboard-section {
             display: none;
             padding: 16px;
             border-radius: 12px;
             margin-bottom: 16px;
             border: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.3s, border 0.3s;
+            transition: background 0.3s ease, border 0.3s ease;
         }
         body.light-mode .dashboard-section { border-color: rgba(0,0,0,0.05); }
-        .dashboard-section.show { display: block; }
-        .dashboard-section h3 { color: #a78bfa; margin-bottom: 12px; }
+        .dashboard-section.show {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+        .dashboard-section h3 {
+            color: #a78bfa;
+            margin-bottom: 12px;
+        }
         body.light-mode .dashboard-section h3 { color: #4f46e5; }
         .dashboard-grid {
             display: grid;
@@ -376,12 +727,25 @@
             padding: 12px;
             border-radius: 8px;
             text-align: center;
-            transition: background 0.3s;
+            transition: background 0.3s ease, transform 0.3s ease;
         }
-        .dashboard-card .value { font-size: 22px; font-weight: 700; color: #a78bfa; }
+        .dashboard-card:hover {
+            transform: scale(1.03);
+        }
+        .dashboard-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #a78bfa;
+        }
         body.light-mode .dashboard-card .value { color: #4f46e5; }
-        .dashboard-card .label { font-size: 11px; margin-top: 4px; }
+        .dashboard-card .label {
+            font-size: 11px;
+            margin-top: 4px;
+        }
 
+        /* ============================================================
+           HISTORIAL
+           ============================================================ */
         .historial-section {
             display: none;
             padding: 16px;
@@ -390,8 +754,14 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
         body.light-mode .historial-section { border-color: rgba(0,0,0,0.05); }
-        .historial-section.show { display: block; }
-        .historial-section h3 { color: #a78bfa; margin-bottom: 12px; }
+        .historial-section.show {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+        .historial-section h3 {
+            color: #a78bfa;
+            margin-bottom: 12px;
+        }
         body.light-mode .historial-section h3 { color: #4f46e5; }
         .historial-item {
             padding: 8px 12px;
@@ -400,20 +770,37 @@
             align-items: center;
             font-size: 13px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s ease;
+        }
+        .historial-item:hover {
+            background: rgba(255,255,255,0.02);
         }
         body.light-mode .historial-item { border-bottom-color: rgba(0,0,0,0.05); }
         .historial-item .query { font-weight: 600; }
-        .historial-item .algo { font-size: 11px; padding: 2px 8px; border-radius: 8px; background: #7c3aed; color: white; }
+        .historial-item .algo {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: #7c3aed;
+            color: white;
+        }
         body.light-mode .historial-item .algo { background: #4f46e5; }
         .historial-item .fecha { font-size: 11px; opacity: 0.6; }
 
+        /* ============================================================
+           RESULTADOS INSTANTÁNEOS
+           ============================================================ */
         #resultadosInstantaneos {
             border-radius: 12px;
             padding: 12px;
             margin-bottom: 12px;
-            transition: background 0.3s, border 0.3s;
+            transition: background 0.3s ease, border 0.3s ease;
+            animation: fadeInUp 0.3s ease-out;
         }
 
+        /* ============================================================
+           MODAL
+           ============================================================ */
         .modal {
             display: none;
             position: fixed;
@@ -425,16 +812,38 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(4px);
         }
-        .modal.show { display: flex; }
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .modal-content {
             padding: 30px;
             border-radius: 16px;
             max-width: 400px;
             width: 90%;
-            transition: background 0.3s, border 0.3s;
+            transition: background 0.3s ease, border 0.3s ease;
+            animation: scaleIn 0.3s ease-out;
         }
-        .modal-content h2 { color: #a78bfa; margin-bottom: 16px; }
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-content h2 {
+            color: #a78bfa;
+            margin-bottom: 16px;
+        }
         body.light-mode .modal-content h2 { color: #4f46e5; }
         .modal-content input {
             width: 100%;
@@ -443,7 +852,7 @@
             border-radius: 8px;
             font-size: 14px;
             outline: none;
-            transition: background 0.3s, border 0.3s, color 0.3s;
+            transition: background 0.3s ease, border 0.3s ease, color 0.3s ease;
         }
         .modal-content input:focus { border-color: #7c3aed; }
         .modal-content .btn-primary {
@@ -457,17 +866,25 @@
             cursor: pointer;
             font-size: 16px;
             margin-top: 8px;
+            transition: all 0.3s ease;
         }
-        .modal-content .btn-primary:hover { opacity: 0.9; }
+        .modal-content .btn-primary:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
         .modal-close {
             float: right;
             opacity: 0.6;
             cursor: pointer;
             font-size: 24px;
             line-height: 1;
+            transition: opacity 0.2s ease;
         }
         .modal-close:hover { opacity: 1; }
 
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
         @media (max-width: 600px) {
             body { padding: 10px; }
             .search-box { flex-direction: column; }
