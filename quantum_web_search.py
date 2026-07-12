@@ -10,6 +10,7 @@ from datetime import datetime
 from urllib.parse import quote_plus
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
+from multi_search import MultiSearch  # <-- NUEVO IMPORT
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -237,3 +238,15 @@ class QuantumWebSearch:
             print(f"   Relevancia: {relevancia:.2f} | Fuente: {resultado.get('fuente', 'Web')}")
         
         print("\n" + "="*70)
+    
+    # ================================================================
+    # NUEVA FUNCIÓN: MULTI FUENTE
+    # ================================================================
+    
+    def buscar_multi_fuente(self, query, max_resultados=20):
+        """Busca en múltiples fuentes y combina resultados."""
+        multi = MultiSearch()
+        resultados = multi.buscar_en_todas(query, max_por_fuente=5)
+        
+        # Filtrar con Grover
+        return self.filtrar_con_grover(resultados, query, max_resultados)
