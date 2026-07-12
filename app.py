@@ -314,6 +314,38 @@ def qaoa_endpoint():
         return jsonify(resultado)
     except Exception as e:
         return jsonify({"error": str(e)})
+
+@app.route('/api/inteligente', methods=['POST'])
+def inteligente():
+    data = request.json
+    query = data.get('query', '')
+    
+    if not query:
+        return jsonify({"error": "Escribe una consulta"})
+    
+    try:
+        from intelligent_search import IntelligentSearch
+        buscador = IntelligentSearch()
+        buscador.cargar_perfil()
+        resultado = buscador.buscar_inteligente(query)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+@app.route('/api/aprender', methods=['POST'])
+def aprender():
+    data = request.json
+    query = data.get('query', '')
+    resultado_seleccionado = data.get('resultado', {})
+    
+    try:
+        from intelligent_search import IntelligentSearch
+        buscador = IntelligentSearch()
+        buscador.cargar_perfil()
+        buscador.aprender(query, resultado_seleccionado)
+        return jsonify({"mensaje": "Aprendizaje completado"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 # ================================================================
 # INICIO
 # ================================================================
