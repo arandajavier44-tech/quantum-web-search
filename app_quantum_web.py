@@ -181,6 +181,17 @@ def limpiar_cache():
     except:
         return jsonify({"error": "No se pudo limpiar caché"})
 
+
+from multi_search import MultiSearch
+
+def buscar_multi_fuente(self, query, max_resultados=20):
+    """Busca en múltiples fuentes y combina resultados."""
+    multi = MultiSearch()
+    resultados = multi.buscar_en_todas(query, max_por_fuente=5)
+    
+    # Filtrar con Grover
+    return self.filtrar_con_grover(resultados, query, max_resultados)
+
 # ================================================================
 # INICIO
 # ================================================================

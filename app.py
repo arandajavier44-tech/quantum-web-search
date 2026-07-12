@@ -243,6 +243,33 @@ def handle_buscar_tiempo_real(data):
     except Exception as e:
         emit('error', {'mensaje': str(e)})
 
+@app.route('/api/buscar_multi', methods=['POST'])
+def buscar_multi():
+    data = request.json
+    query = data.get('query', '')
+    max_resultados = data.get('max_resultados', 20)
+    
+    if not query:
+        return jsonify({"error": "Escribe una consulta"})
+    
+    try:
+        resultado = buscador.buscar_multi_fuente(query, max_resultados)
+        
+        db.guardar_busqueda(
+            query=query,
+            algoritmo="MultiFuente",
+            resultados=len(resultado),
+            tiempo=0
+        )
+        
+        return jsonify({
+            "resultados": resultado,
+            "total": len(resultado),
+            "fuentes": ["Google", "Wikipedia", "YouTube", "News"]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 # ================================================================
 # INICIO
 # ================================================================
