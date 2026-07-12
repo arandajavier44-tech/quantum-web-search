@@ -115,6 +115,7 @@
         .badge.vqe { background: #d97706; color: white; }
         .badge.multi { background: #d97706; color: white; }
         .badge.shor { background: #dc2626; color: white; }
+        .badge.qaoa { background: #f59e0b; color: black; }
 
         .header-actions {
             display: flex;
@@ -173,6 +174,7 @@
         .btn-cerebro { background: linear-gradient(135deg, #7c3aed, #059669); }
         .btn-multi { background: linear-gradient(135deg, #d97706, #059669); }
         .btn-shor { background: linear-gradient(135deg, #dc2626, #7c3aed); }
+        .btn-qaoa { background: linear-gradient(135deg, #f59e0b, #ef4444); }
 
         .pagination-controls {
             display: flex;
@@ -213,10 +215,12 @@
         .mode-cerebro { background: rgba(5,150,105,0.2); color: #22c55e; }
         .mode-multi { background: rgba(217,119,6,0.2); color: #fbbf24; }
         .mode-shor { background: rgba(220,38,38,0.2); color: #f87171; }
+        .mode-qaoa { background: rgba(245,158,11,0.2); color: #fbbf24; }
         body.light-mode .mode-grover { background: rgba(79,70,229,0.1); color: #4f46e5; }
         body.light-mode .mode-cerebro { background: rgba(5,150,105,0.1); color: #059669; }
         body.light-mode .mode-multi { background: rgba(217,119,6,0.1); color: #d97706; }
         body.light-mode .mode-shor { background: rgba(220,38,38,0.1); color: #dc2626; }
+        body.light-mode .mode-qaoa { background: rgba(245,158,11,0.1); color: #d97706; }
 
         .stats-bar {
             display: flex;
@@ -310,6 +314,16 @@
         .shor-result .numero { font-size: 32px; font-weight: 700; color: #a78bfa; text-align: center; }
         .shor-result .factorizacion { font-size: 24px; text-align: center; margin: 8px 0; }
         .shor-result .factorizacion .factores { color: #22c55e; font-weight: 700; }
+
+        .qaoa-result {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(245,158,11,0.3);
+            background: rgba(245,158,11,0.05);
+        }
+        .qaoa-result h3 { color: #fbbf24; margin-bottom: 8px; font-size: 18px; }
+        .qaoa-result .valor { font-size: 24px; font-weight: 700; color: #22c55e; text-align: center; }
 
         .loading, .no-results, .error {
             text-align: center;
@@ -478,7 +492,7 @@
         <div class="header-top">
             <div>
                 <h1>🌐 Quantum <span>Web Search</span></h1>
-                <div class="sub">🔍 Grover + 🧠 Cerebro + 🌐 Multi Fuente + 🔬 Shor</div>
+                <div class="sub">🔍 Grover + 🧠 Cerebro + 🌐 Multi Fuente + 🔬 Shor + 📊 QAOA</div>
             </div>
             <div class="header-actions">
                 <span id="wsStatus" style="font-size:12px; color:#22c55e;">🟢 En vivo</span>
@@ -495,6 +509,7 @@
             <span class="badge cerebro">🧠 Cerebro</span>
             <span class="badge multi">🌐 Multi Fuente</span>
             <span class="badge shor">🔬 Shor</span>
+            <span class="badge qaoa">📊 QAOA</span>
             <span class="badge qrng">🎲 QRNG</span>
             <span class="badge bell">🔗 Bell</span>
             <span class="badge vqe">⚗️ VQE</span>
@@ -510,11 +525,12 @@
     BUSCADOR
     ============================================================ -->
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Busca en internet o escribe un número para factorizar..." autofocus>
+        <input type="text" id="searchInput" placeholder="Busca, factoriza u optimiza..." autofocus>
         <button class="btn-search" id="searchBtn">🔍 Buscar</button>
         <button class="btn-cerebro" id="cerebroBtn">🧠 Cerebro</button>
         <button class="btn-multi" id="multiBtn">🌐 Multi Fuente</button>
         <button class="btn-shor" id="shorBtn">🔬 Shor</button>
+        <button class="btn-qaoa" id="qaoaBtn">📊 QAOA</button>
     </div>
 
     <!-- ============================================================
@@ -572,7 +588,7 @@
     <!-- ============================================================
     CACHE INFO
     ============================================================ -->
-    <div class="cache-info" id="cacheInfo">💾 Caché cuántico activo | ⚡ Grover | 🧠 Cerebro | 🌐 Multi Fuente | 🔬 Shor</div>
+    <div class="cache-info" id="cacheInfo">💾 Caché cuántico activo | ⚡ Grover | 🧠 Cerebro | 🌐 Multi Fuente | 🔬 Shor | 📊 QAOA</div>
 </div>
 
 <!-- ============================================================
@@ -620,6 +636,7 @@ const searchBtn = document.getElementById('searchBtn');
 const cerebroBtn = document.getElementById('cerebroBtn');
 const multiBtn = document.getElementById('multiBtn');
 const shorBtn = document.getElementById('shorBtn');
+const qaoaBtn = document.getElementById('qaoaBtn');
 const resultsDiv = document.getElementById('results');
 const statsBar = document.getElementById('statsBar');
 const cacheInfo = document.getElementById('cacheInfo');
@@ -721,6 +738,7 @@ async function buscar() {
     cerebroBtn.disabled = true;
     multiBtn.disabled = true;
     shorBtn.disabled = true;
+    qaoaBtn.disabled = true;
     searchBtn.textContent = '⏳ Buscando...';
     modoActual = 'grover';
     modeIndicator.textContent = '🔍 Modo: Grover';
@@ -777,7 +795,119 @@ async function buscar() {
     cerebroBtn.disabled = false;
     multiBtn.disabled = false;
     shorBtn.disabled = false;
+    qaoaBtn.disabled = false;
     searchBtn.textContent = '🔍 Buscar';
+}
+
+// ============================================================
+// QAOA - OPTIMIZACIÓN
+// ============================================================
+async function ejecutarQAOA() {
+    const query = searchInput.value.trim();
+    if (!query) {
+        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe un problema de optimización (ej: "mochila 8")</div>';
+        return;
+    }
+
+    if (isProcessing) return;
+    isProcessing = true;
+    searchBtn.disabled = true;
+    cerebroBtn.disabled = true;
+    multiBtn.disabled = true;
+    shorBtn.disabled = true;
+    qaoaBtn.disabled = true;
+    qaoaBtn.textContent = '⏳ Optimizando...';
+    modoActual = 'qaoa';
+    modeIndicator.textContent = '📊 Modo: QAOA (Optimización)';
+    modeIndicator.className = 'mode-indicator mode-qaoa';
+
+    resultsDiv.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            <div>📊 Optimizando con QAOA...</div>
+            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Algoritmo de optimización cuántica</div>
+        </div>
+    `;
+    cacheInfo.textContent = '📊 Optimizando con QAOA...';
+
+    try {
+        // Detectar si es problema de mochila
+        const esMochila = query.toLowerCase().includes('mochila');
+        
+        let body = { problema: 'qaoa' };
+        if (esMochila) {
+            const partes = query.split(' ');
+            const capacidad = parseInt(partes[partes.length - 1]) || 8;
+            body = {
+                problema: 'mochila',
+                pesos: [2, 3, 4, 5],
+                valores: [3, 4, 5, 6],
+                capacidad: capacidad
+            };
+        }
+
+        const res = await fetch('/api/qaoa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+            cacheInfo.textContent = '⚠️ Error en QAOA';
+            return;
+        }
+
+        let html = `
+            <div class="qaoa-result">
+                <h3>📊 Resultado de QAOA</h3>
+                <div style="padding:16px;">
+        `;
+
+        if (data.mejor_estado !== undefined) {
+            html += `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
+                        <div style="font-size:24px; font-weight:700; color:#f59e0b;">${data.mejor_estado}</div>
+                        <div style="font-size:12px; color:#71717a;">Mejor estado</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
+                        <div style="font-size:24px; font-weight:700; color:#22c55e;">${data.energia || data.valor_total}</div>
+                        <div style="font-size:12px; color:#71717a;">${data.valor_total ? 'Valor total' : 'Energía'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (data.explicacion) {
+            html += `<div style="margin-top:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:14px; color:#a1a1aa;">💡 ${data.explicacion}</div>`;
+        }
+
+        html += `</div></div>`;
+        resultsDiv.innerHTML = html;
+
+        statsBar.innerHTML = `
+            <div class="stats-bar">
+                <div class="stat">📊 <strong>QAOA</strong></div>
+                <div class="stat">✅ <strong>Optimizado</strong></div>
+            </div>
+        `;
+
+        cacheInfo.textContent = '📊 QAOA completado';
+
+    } catch (e) {
+        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
+        cacheInfo.textContent = '⚠️ Error en QAOA';
+    }
+
+    isProcessing = false;
+    searchBtn.disabled = false;
+    cerebroBtn.disabled = false;
+    multiBtn.disabled = false;
+    shorBtn.disabled = false;
+    qaoaBtn.disabled = false;
+    qaoaBtn.textContent = '📊 QAOA';
 }
 
 // ============================================================
@@ -802,6 +932,7 @@ async function ejecutarShor() {
     cerebroBtn.disabled = true;
     multiBtn.disabled = true;
     shorBtn.disabled = true;
+    qaoaBtn.disabled = true;
     shorBtn.textContent = '⏳ Factorizando...';
     modoActual = 'shor';
     modeIndicator.textContent = '🔬 Modo: Shor (Factorización)';
@@ -868,6 +999,7 @@ async function ejecutarShor() {
     cerebroBtn.disabled = false;
     multiBtn.disabled = false;
     shorBtn.disabled = false;
+    qaoaBtn.disabled = false;
     shorBtn.textContent = '🔬 Shor';
 }
 
@@ -887,6 +1019,7 @@ async function buscarMulti() {
     cerebroBtn.disabled = true;
     multiBtn.disabled = true;
     shorBtn.disabled = true;
+    qaoaBtn.disabled = true;
     multiBtn.textContent = '⏳ Buscando...';
     modoActual = 'multi';
     modeIndicator.textContent = '🌐 Modo: Multi Fuente';
@@ -956,6 +1089,7 @@ async function buscarMulti() {
     cerebroBtn.disabled = false;
     multiBtn.disabled = false;
     shorBtn.disabled = false;
+    qaoaBtn.disabled = false;
     multiBtn.textContent = '🌐 Multi Fuente';
 }
 
@@ -1037,6 +1171,7 @@ async function ejecutarCerebro() {
     cerebroBtn.disabled = true;
     multiBtn.disabled = true;
     shorBtn.disabled = true;
+    qaoaBtn.disabled = true;
     cerebroBtn.textContent = '⏳ Procesando...';
     modoActual = 'cerebro';
     modeIndicator.textContent = '🧠 Modo: Cerebro Cuántico';
@@ -1113,6 +1248,7 @@ async function ejecutarCerebro() {
     cerebroBtn.disabled = false;
     multiBtn.disabled = false;
     shorBtn.disabled = false;
+    qaoaBtn.disabled = false;
     cerebroBtn.textContent = '🧠 Cerebro';
 }
 
@@ -1271,12 +1407,14 @@ searchBtn.addEventListener('click', buscar);
 cerebroBtn.addEventListener('click', ejecutarCerebro);
 multiBtn.addEventListener('click', buscarMulti);
 shorBtn.addEventListener('click', ejecutarShor);
+qaoaBtn.addEventListener('click', ejecutarQAOA);
 
 searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
         if (modoActual === 'cerebro') ejecutarCerebro();
         else if (modoActual === 'multi') buscarMulti();
         else if (modoActual === 'shor') ejecutarShor();
+        else if (modoActual === 'qaoa') ejecutarQAOA();
         else buscar();
     }
 });

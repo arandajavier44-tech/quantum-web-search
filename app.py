@@ -291,6 +291,30 @@ def shor_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route('/api/qaoa', methods=['POST'])
+def qaoa_endpoint():
+    data = request.json
+    problema = data.get('problema', 'mochila')
+    
+    try:
+        from qaoa_algorithm import QAOAAlgorithm
+        qaoa = QAOAAlgorithm()
+        
+        if problema == 'mochila':
+            pesos = data.get('pesos', [2, 3, 4, 5])
+            valores = data.get('valores', [3, 4, 5, 6])
+            capacidad = data.get('capacidad', 8)
+            resultado = qaoa.problema_mochila(pesos, valores, capacidad)
+        else:
+            n_qubits = data.get('n_qubits', 4)
+            p = data.get('p', 1)
+            iteraciones = data.get('iteraciones', 20)
+            resultado = qaoa.optimizar(n_qubits, p, iteraciones)
+        
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 # ================================================================
 # INICIO
 # ================================================================
