@@ -294,7 +294,7 @@ def shor_endpoint():
 @app.route('/api/qaoa', methods=['POST'])
 def qaoa_endpoint():
     data = request.json
-    problema = data.get('problema', 'mochila')
+    problema = data.get('problema', 'qaoa')
     
     try:
         from qaoa_algorithm import QAOAAlgorithm
@@ -314,7 +314,6 @@ def qaoa_endpoint():
         return jsonify(resultado)
     except Exception as e:
         return jsonify({"error": str(e)})
-
 # ================================================================
 # INICIO
 # ================================================================
