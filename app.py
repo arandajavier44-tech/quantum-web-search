@@ -270,6 +270,27 @@ def buscar_multi():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route('/api/shor', methods=['POST'])
+def shor_endpoint():
+    data = request.json
+    numero = data.get('numero', 0)
+    
+    if numero < 2:
+        return jsonify({"error": "El número debe ser mayor que 1"})
+    
+    try:
+        from shor_algorithm import ShorAlgorithm
+        shor = ShorAlgorithm()
+        factores = shor.factorizar(numero)
+        
+        return jsonify({
+            "numero": numero,
+            "factores": factores,
+            "factorizacion": f"{numero} = {factores[0]} × {factores[1]}"
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 # ================================================================
 # INICIO
 # ================================================================
