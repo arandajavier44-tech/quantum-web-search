@@ -40,6 +40,13 @@
         body.dark-mode .resultado-container .shor-result { background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.3); }
         body.dark-mode .resultado-container .qaoa-result { background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.3); }
         body.dark-mode .resultado-container .inteligente-result { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.3); }
+        body.dark-mode .resultado-container .referencias-section { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 12px; margin-top: 12px; }
+        body.dark-mode .resultado-container .ref-item { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+        body.dark-mode .resultado-container .ref-item .ref-tienda { font-weight: 600; color: #e4e4e7; }
+        body.dark-mode .resultado-container .ref-item .ref-precio { font-size: 13px; color: #a1a1aa; }
+        body.dark-mode .resultado-container .ref-item .ref-calif { font-size: 12px; color: #fbbf24; }
+        body.dark-mode .resultado-container .ref-item .ref-link { color: #06b6d4; text-decoration: none; font-size: 13px; padding: 2px 10px; border: 1px solid #06b6d4; border-radius: 6px; transition: all 0.2s; }
+        body.dark-mode .resultado-container .ref-item .ref-link:hover { background: #06b6d4; color: #0a0a0f; }
         body.dark-mode .modal-content { background: #1a1a2e; border: 1px solid rgba(255,255,255,0.05); }
         body.dark-mode .modal-content input { background: #12121a; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
         body.dark-mode .pagination-controls select { background: #1a1a26; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
@@ -75,6 +82,13 @@
         body.light-mode .resultado-container .shor-result { background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.2); }
         body.light-mode .resultado-container .qaoa-result { background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); }
         body.light-mode .resultado-container .inteligente-result { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); }
+        body.light-mode .resultado-container .referencias-section { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 12px; margin-top: 12px; }
+        body.light-mode .resultado-container .ref-item { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+        body.light-mode .resultado-container .ref-item .ref-tienda { font-weight: 600; color: #1a1a2e; }
+        body.light-mode .resultado-container .ref-item .ref-precio { font-size: 13px; color: #4a4a5a; }
+        body.light-mode .resultado-container .ref-item .ref-calif { font-size: 12px; color: #d97706; }
+        body.light-mode .resultado-container .ref-item .ref-link { color: #4f46e5; text-decoration: none; font-size: 13px; padding: 2px 10px; border: 1px solid #4f46e5; border-radius: 6px; transition: all 0.2s; }
+        body.light-mode .resultado-container .ref-item .ref-link:hover { background: #4f46e5; color: #ffffff; }
         body.light-mode .modal-content { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
         body.light-mode .modal-content input { background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
         body.light-mode .pagination-controls select { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
@@ -171,6 +185,14 @@
         .resultado-container .datos-faltantes .faltante { font-size: 13px; color: #a1a1aa; }
         .resultado-container .datos-faltantes .sugerencia { font-size: 13px; color: #a78bfa; margin-top: 6px; }
 
+        .resultado-container .referencias-section { border-radius: 8px; padding: 12px; margin-top: 12px; }
+        .resultado-container .referencias-section .ref-titulo { font-size: 14px; color: #a78bfa; margin-bottom: 8px; }
+        .resultado-container .ref-item { border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+        .resultado-container .ref-item .ref-tienda { font-weight: 600; }
+        .resultado-container .ref-item .ref-precio { font-size: 13px; }
+        .resultado-container .ref-item .ref-calif { font-size: 12px; color: #fbbf24; }
+        .resultado-container .ref-item .ref-link { text-decoration: none; font-size: 13px; padding: 2px 10px; border-radius: 6px; transition: all 0.2s; }
+
         .resultado-container .shor-result { padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 12px; }
         .resultado-container .shor-result .numero { font-size: 32px; font-weight: 700; color: #a78bfa; }
         .resultado-container .shor-result .factorizacion { font-size: 24px; margin: 8px 0; }
@@ -253,7 +275,7 @@
         .modal-close { float: right; opacity: 0.6; cursor: pointer; font-size: 24px; line-height: 1; transition: opacity 0.2s ease; }
         .modal-close:hover { opacity: 1; }
 
-        @media (max-width: 600px) { body { padding: 10px; } .search-box { flex-direction: column; } .search-box button { width: 100%; justify-content: center; } .header h1 { font-size: 22px; } .header-top { flex-direction: column; align-items: center; } .stats-bar { flex-direction: column; } .resultado-container .grid-2 { grid-template-columns: 1fr 1fr; } .resultado-container .precios-grid { grid-template-columns: 1fr 1fr; } .historial-item { flex-wrap: wrap; gap: 4px; } .pagination-controls { justify-content: center; } }
+        @media (max-width: 600px) { body { padding: 10px; } .search-box { flex-direction: column; } .search-box button { width: 100%; justify-content: center; } .header h1 { font-size: 22px; } .header-top { flex-direction: column; align-items: center; } .stats-bar { flex-direction: column; } .resultado-container .grid-2 { grid-template-columns: 1fr 1fr; } .resultado-container .precios-grid { grid-template-columns: 1fr 1fr; } .historial-item { flex-wrap: wrap; gap: 4px; } .pagination-controls { justify-content: center; } .resultado-container .ref-item { flex-direction: column; align-items: stretch; text-align: center; } }
     </style>
 </head>
 <body>
@@ -542,57 +564,81 @@ async function buscarUnificado() {
                 </div>
         `;
 
-        // COMPRAS
-        if (resultado.recomendaciones?.mejor_opcion) {
-            const mejor = resultado.recomendaciones.mejor_opcion;
+        // ============================================================
+        // COMPRAS - Con referencias y enlaces
+        // ============================================================
+        if (resultado.recomendacion?.referencias && resultado.recomendacion.referencias.length > 0) {
+            const rec = resultado.recomendacion;
+            
             html += `
-                <div class="mejor-opcion">
-                    <div class="titulo">⭐ Mejor Opción</div>
-                    <div class="detalle">
-                        <div><strong>📦 Producto:</strong> ${mejor.nombre}</div>
-                        <div><strong>💰 Precio:</strong> $${mejor.precio?.toLocaleString()}</div>
-                        <div><strong>⭐ Calificación:</strong> ${mejor.calificacion}/5</div>
-                        <div><strong>🏷️ Tienda:</strong> ${mejor.tienda}</div>
-                        <div><strong>📊 Puntuación:</strong> ${mejor.puntuacion}</div>
-                    </div>
-                </div>
-                <div class="precios-grid">
-                    <div class="card min">
-                        <div class="valor">$${resultado.recomendaciones.precio_minimo?.toLocaleString()}</div>
-                        <div class="label">💰 Precio mínimo</div>
-                    </div>
-                    <div class="card prom">
-                        <div class="valor">$${resultado.recomendaciones.precio_promedio?.toLocaleString()}</div>
-                        <div class="label">📊 Precio promedio</div>
-                    </div>
-                    <div class="card max">
-                        <div class="valor">$${resultado.recomendaciones.precio_maximo?.toLocaleString()}</div>
-                        <div class="label">💰 Precio máximo</div>
-                    </div>
-                </div>
+                <div style="margin-top:8px; font-size:14px; color:#a78bfa;">📦 ${rec.producto || 'Producto'}</div>
+                ${rec.descripcion ? `<div style="font-size:13px; color:#a1a1aa; margin-bottom:8px;">${rec.descripcion}</div>` : ''}
+                
+                <div class="referencias-section">
+                    <div class="ref-titulo">🔗 Referencias y enlaces:</div>
             `;
-            if (resultado.recomendaciones.consejos) {
+            
+            rec.referencias.forEach((ref, i) => {
+                const precio = ref.precio ? `$${ref.precio.toLocaleString()}` : 'Consultar precio';
+                const calif = ref.calificacion ? `⭐ ${ref.calificacion}/5` : '';
                 html += `
-                    <div class="consejos">
-                        <div class="titulo-consejos">💡 Consejos:</div>
-                        ${resultado.recomendaciones.consejos.map(c => `<div class="consejo">• ${c}</div>`).join('')}
+                    <div class="ref-item">
+                        <span class="ref-tienda">${i+1}. ${ref.tienda}</span>
+                        <span class="ref-precio">${precio}</span>
+                        <span class="ref-calif">${calif}</span>
+                        <a href="${ref.url}" target="_blank" class="ref-link">🔗 Ver</a>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            // Precios
+            if (rec.precio_minimo || rec.precio_maximo) {
+                html += `
+                    <div class="precios-grid">
+                        <div class="card min">
+                            <div class="valor">${rec.precio_minimo ? `$${rec.precio_minimo.toLocaleString()}` : 'N/A'}</div>
+                            <div class="label">💰 Precio mínimo</div>
+                        </div>
+                        <div class="card prom">
+                            <div class="valor">${rec.precio_promedio ? `$${rec.precio_promedio.toLocaleString()}` : 'N/A'}</div>
+                            <div class="label">📊 Precio promedio</div>
+                        </div>
+                        <div class="card max">
+                            <div class="valor">${rec.precio_maximo ? `$${rec.precio_maximo.toLocaleString()}` : 'N/A'}</div>
+                            <div class="label">💰 Precio máximo</div>
+                        </div>
                     </div>
                 `;
             }
+            
+            // Consejos
+            if (rec.consejos && rec.consejos.length > 0) {
+                html += `
+                    <div class="consejos">
+                        <div class="titulo-consejos">💡 Consejos:</div>
+                        ${rec.consejos.map(c => `<div class="consejo">• ${c}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            // Datos faltantes
             if (resultado.necesita_datos) {
                 html += `
                     <div class="datos-faltantes">
                         <div class="titulo-faltantes">⚠️ Datos faltantes:</div>
                         ${!resultado.intencion?.producto ? '<div class="faltante">• No especificaste el producto claramente</div>' : ''}
                         ${!resultado.intencion?.precio_estimado ? '<div class="faltante">• No especificaste un presupuesto</div>' : ''}
-                        ${!resultado.intencion?.ubicacion ? '<div class="faltante">• No especificaste tu ubicación</div>' : ''}
-                        <div class="sugerencia">💡 Sugerencia: "comprar termica bipolar 25 amp por menos de $15000 en Buenos Aires"</div>
+                        <div class="sugerencia">💡 Sugerencia: "comprar termica bipolar 25 amp por menos de $15000"</div>
                     </div>
                 `;
             }
         }
 
+        // ============================================================
         // SHOR
+        // ============================================================
         if (resultado.factorizacion) {
             const esPrimo = resultado.factores?.[1] === 1;
             html += `
@@ -606,7 +652,9 @@ async function buscarUnificado() {
             `;
         }
 
+        // ============================================================
         // QAOA
+        // ============================================================
         if (resultado.mejor_estado) {
             html += `
                 <div class="qaoa-result">
@@ -618,7 +666,9 @@ async function buscarUnificado() {
             `;
         }
 
+        // ============================================================
         // INTELIGENTE
+        // ============================================================
         if (resultado.intencion) {
             html += `
                 <div class="inteligente-result">
@@ -659,8 +709,10 @@ async function buscarUnificado() {
             html += `</div>`;
         }
 
-        // GROVER (resultados de búsqueda)
-        if (resultado.resultados && resultado.resultados.length > 0 && !resultado.recomendaciones?.mejor_opcion) {
+        // ============================================================
+        // GROVER
+        // ============================================================
+        if (resultado.resultados && resultado.resultados.length > 0 && !resultado.recomendacion?.referencias) {
             html += `<div style="margin-top:8px; font-size:14px; color:#a78bfa;">🔍 Resultados encontrados:</div>`;
             resultado.resultados.slice(0, 10).forEach((r, i) => {
                 html += `
@@ -678,7 +730,9 @@ async function buscarUnificado() {
             });
         }
 
+        // ============================================================
         // CEREBRO
+        // ============================================================
         if (resultado.id) {
             html += `
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:8px;">
