@@ -565,15 +565,13 @@ async function buscarUnificado() {
         `;
 
         // ============================================================
-        // COMPRAS - Con referencias y enlaces
+        // COMPRAS - Con referencias y enlaces (CORREGIDO)
         // ============================================================
-        if (resultado.recomendacion?.referencias && resultado.recomendacion.referencias.length > 0) {
-            const rec = resultado.recomendacion;
-            
+        const rec = resultado.recomendacion || resultado.recomendaciones || {};
+        if (rec.referencias && rec.referencias.length > 0) {
             html += `
                 <div style="margin-top:8px; font-size:14px; color:#a78bfa;">📦 ${rec.producto || 'Producto'}</div>
                 ${rec.descripcion ? `<div style="font-size:13px; color:#a1a1aa; margin-bottom:8px;">${rec.descripcion}</div>` : ''}
-                
                 <div class="referencias-section">
                     <div class="ref-titulo">🔗 Referencias y enlaces:</div>
             `;
@@ -581,12 +579,13 @@ async function buscarUnificado() {
             rec.referencias.forEach((ref, i) => {
                 const precio = ref.precio ? `$${ref.precio.toLocaleString()}` : 'Consultar precio';
                 const calif = ref.calificacion ? `⭐ ${ref.calificacion}/5` : '';
+                const url = ref.url || '#';
                 html += `
                     <div class="ref-item">
                         <span class="ref-tienda">${i+1}. ${ref.tienda}</span>
                         <span class="ref-precio">${precio}</span>
                         <span class="ref-calif">${calif}</span>
-                        <a href="${ref.url}" target="_blank" class="ref-link">🔗 Ver</a>
+                        <a href="${url}" target="_blank" class="ref-link">🔗 Ver</a>
                     </div>
                 `;
             });
@@ -712,7 +711,7 @@ async function buscarUnificado() {
         // ============================================================
         // GROVER
         // ============================================================
-        if (resultado.resultados && resultado.resultados.length > 0 && !resultado.recomendacion?.referencias) {
+        if (resultado.resultados && resultado.resultados.length > 0 && !rec.referencias) {
             html += `<div style="margin-top:8px; font-size:14px; color:#a78bfa;">🔍 Resultados encontrados:</div>`;
             resultado.resultados.slice(0, 10).forEach((r, i) => {
                 html += `
