@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 Quantum Web Search</title>
+    <title>🚀 Quantum Web Search</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -31,18 +31,24 @@
         body.dark-mode .no-results { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #71717a; }
         body.dark-mode .loading { background: #12121a; border: 1px solid rgba(255,255,255,0.05); color: #71717a; }
         body.dark-mode .error { background: #12121a; border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
-        body.dark-mode .cerebro-result { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
-        body.dark-mode .cerebro-card { background: rgba(255,255,255,0.03); }
-        body.dark-mode .cerebro-card .label { color: #71717a; }
-        body.dark-mode .cerebro-tag { background: rgba(124,58,237,0.15); color: #a78bfa; }
-        body.dark-mode .cache-info { color: #52525b; }
-        body.dark-mode .historial-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
-        body.dark-mode .dashboard-card { background: rgba(255,255,255,0.03); }
-        body.dark-mode .dashboard-card .label { color: #71717a; }
+        body.dark-mode .resultado-container { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .resultado-container .algo-tag { background: rgba(124,58,237,0.2); color: #a78bfa; }
+        body.dark-mode .resultado-container .mejor-opcion { background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.2); }
+        body.dark-mode .resultado-container .precios-grid .card { background: rgba(255,255,255,0.03); }
+        body.dark-mode .resultado-container .consejos { background: rgba(255,255,255,0.03); }
+        body.dark-mode .resultado-container .datos-faltantes { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
+        body.dark-mode .resultado-container .shor-result { background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.3); }
+        body.dark-mode .resultado-container .qaoa-result { background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.3); }
+        body.dark-mode .resultado-container .inteligente-result { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.3); }
         body.dark-mode .modal-content { background: #1a1a2e; border: 1px solid rgba(255,255,255,0.05); }
         body.dark-mode .modal-content input { background: #12121a; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
         body.dark-mode .pagination-controls select { background: #1a1a26; border: 1px solid rgba(255,255,255,0.08); color: #e4e4e7; }
         body.dark-mode #resultadosInstantaneos { background: #12121a; border: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .cache-info { color: #52525b; }
+        body.dark-mode .historial-item { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        body.dark-mode .dashboard-card { background: rgba(255,255,255,0.03); }
+        body.dark-mode .dashboard-card .label { color: #71717a; }
+        body.dark-mode .mode-indicator { background: rgba(6,182,212,0.2); color: #06b6d4; }
 
         body.light-mode { background: #f0f0f5; color: #1a1a2e; }
         body.light-mode .header { background: linear-gradient(135deg, #e8e8f0, #d5d5e0); border: 1px solid rgba(0,0,0,0.05); }
@@ -60,18 +66,24 @@
         body.light-mode .no-results { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
         body.light-mode .loading { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); color: #4a4a5a; }
         body.light-mode .error { background: #ffffff; border: 1px solid rgba(239,68,68,0.2); color: #dc2626; }
-        body.light-mode .cerebro-result { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
-        body.light-mode .cerebro-card { background: rgba(0,0,0,0.03); }
-        body.light-mode .cerebro-card .label { color: #6a6a7a; }
-        body.light-mode .cerebro-tag { background: rgba(79,70,229,0.1); color: #4f46e5; }
-        body.light-mode .cache-info { color: #6a6a7a; }
-        body.light-mode .historial-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
-        body.light-mode .dashboard-card { background: rgba(0,0,0,0.03); }
-        body.light-mode .dashboard-card .label { color: #6a6a7a; }
+        body.light-mode .resultado-container { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .resultado-container .algo-tag { background: rgba(79,70,229,0.1); color: #4f46e5; }
+        body.light-mode .resultado-container .mejor-opcion { background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.1); }
+        body.light-mode .resultado-container .precios-grid .card { background: rgba(0,0,0,0.03); }
+        body.light-mode .resultado-container .consejos { background: rgba(0,0,0,0.03); }
+        body.light-mode .resultado-container .datos-faltantes { background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.1); }
+        body.light-mode .resultado-container .shor-result { background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.2); }
+        body.light-mode .resultado-container .qaoa-result { background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); }
+        body.light-mode .resultado-container .inteligente-result { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); }
         body.light-mode .modal-content { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
         body.light-mode .modal-content input { background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
         body.light-mode .pagination-controls select { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); color: #1a1a2e; }
         body.light-mode #resultadosInstantaneos { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .cache-info { color: #6a6a7a; }
+        body.light-mode .historial-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        body.light-mode .dashboard-card { background: rgba(0,0,0,0.03); }
+        body.light-mode .dashboard-card .label { color: #6a6a7a; }
+        body.light-mode .mode-indicator { background: rgba(6,182,212,0.1); color: #06b6d4; }
 
         .container { max-width: 1000px; width: 100%; animation: fadeInUp 0.6s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -96,13 +108,13 @@
         .badge.qaoa { background: #f59e0b; color: black; }
         .badge.inteligente { background: #06b6d4; color: white; }
         .badge.compras { background: #dc2626; color: white; }
+        .badge.unificado { background: #7c3aed; color: white; }
 
         .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .header-actions button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a1a1aa; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.25s ease; }
         .header-actions button:hover { background: rgba(255,255,255,0.12); color: #e4e4e7; transform: scale(1.05); }
         body.light-mode .header-actions button { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); color: #4a4a5a; }
         body.light-mode .header-actions button:hover { background: rgba(0,0,0,0.08); color: #1a1a2e; }
-
         #wsStatus { font-size: 12px; transition: color 0.3s ease; }
 
         .search-box { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -113,13 +125,12 @@
         .search-box button:hover::after { opacity: 1; }
         .search-box button:hover { transform: scale(1.04); box-shadow: 0 4px 20px rgba(124,58,237,0.3); }
         .search-box button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-search { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
-        .btn-cerebro { background: linear-gradient(135deg, #7c3aed, #059669); }
-        .btn-multi { background: linear-gradient(135deg, #d97706, #059669); }
-        .btn-shor { background: linear-gradient(135deg, #dc2626, #7c3aed); }
-        .btn-qaoa { background: linear-gradient(135deg, #f59e0b, #ef4444); }
-        .btn-inteligente { background: linear-gradient(135deg, #059669, #06b6d4); }
-        .btn-compras { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .btn-unificado { background: linear-gradient(135deg, #7c3aed, #06b6d4); }
+
+        .mode-indicator { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 12px; animation: pulseMode 2s ease-in-out infinite; }
+        @keyframes pulseMode { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .mode-unificado { background: rgba(6,182,212,0.2); color: #06b6d4; }
+        body.light-mode .mode-unificado { background: rgba(6,182,212,0.1); color: #06b6d4; }
 
         .pagination-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
         .pagination-controls select { padding: 6px 12px; border-radius: 8px; font-size: 13px; outline: none; transition: background 0.3s ease, border 0.3s ease, color 0.3s ease; }
@@ -127,25 +138,58 @@
         .pagination-controls button:hover:not(:disabled) { background: rgba(255,255,255,0.12); transform: scale(1.05); }
         .pagination-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .mode-indicator { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 12px; animation: pulseMode 2s ease-in-out infinite; }
-        @keyframes pulseMode { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .mode-grover { background: rgba(124,58,237,0.2); color: #a78bfa; }
-        .mode-cerebro { background: rgba(5,150,105,0.2); color: #22c55e; }
-        .mode-multi { background: rgba(217,119,6,0.2); color: #fbbf24; }
-        .mode-shor { background: rgba(220,38,38,0.2); color: #f87171; }
-        .mode-qaoa { background: rgba(245,158,11,0.2); color: #fbbf24; }
-        .mode-inteligente { background: rgba(6,182,212,0.2); color: #06b6d4; }
-        .mode-compras { background: rgba(220,38,38,0.2); color: #f87171; }
-        body.light-mode .mode-grover { background: rgba(79,70,229,0.1); color: #4f46e5; }
-        body.light-mode .mode-cerebro { background: rgba(5,150,105,0.1); color: #059669; }
-        body.light-mode .mode-multi { background: rgba(217,119,6,0.1); color: #d97706; }
-        body.light-mode .mode-shor { background: rgba(220,38,38,0.1); color: #dc2626; }
-        body.light-mode .mode-qaoa { background: rgba(245,158,11,0.1); color: #d97706; }
-        body.light-mode .mode-inteligente { background: rgba(6,182,212,0.1); color: #06b6d4; }
-        body.light-mode .mode-compras { background: rgba(220,38,38,0.1); color: #dc2626; }
-
         .stats-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
         .stats-bar .stat { padding: 6px 14px; border-radius: 8px; font-size: 13px; transition: background 0.3s ease, border 0.3s ease, color 0.3s ease; }
+
+        .resultado-container { border-radius: 12px; padding: 16px; margin-bottom: 16px; transition: background 0.3s ease, border 0.3s ease; animation: fadeInUp 0.5s ease-out; }
+        .resultado-container .algo-tag { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+        .resultado-container h3 { margin-bottom: 8px; font-size: 18px; }
+        .resultado-container .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .resultado-container .grid-2 .card { padding: 12px; border-radius: 8px; text-align: center; }
+        .resultado-container .grid-2 .card .valor { font-size: 20px; font-weight: 700; color: #06b6d4; }
+        .resultado-container .grid-2 .card .label { font-size: 12px; color: #71717a; }
+
+        .resultado-container .mejor-opcion { padding: 16px; border-radius: 8px; margin-bottom: 12px; }
+        .resultado-container .mejor-opcion .titulo { font-size: 18px; font-weight: 700; color: #dc2626; }
+        .resultado-container .mejor-opcion .detalle { margin-top: 8px; }
+        .resultado-container .mejor-opcion .detalle div { padding: 2px 0; }
+
+        .resultado-container .precios-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .resultado-container .precios-grid .card { padding: 10px; border-radius: 6px; text-align: center; }
+        .resultado-container .precios-grid .card .valor { font-size: 18px; font-weight: 700; }
+        .resultado-container .precios-grid .card .label { font-size: 11px; color: #71717a; }
+        .resultado-container .precios-grid .card.min .valor { color: #22c55e; }
+        .resultado-container .precios-grid .card.prom .valor { color: #fbbf24; }
+        .resultado-container .precios-grid .card.max .valor { color: #f87171; }
+
+        .resultado-container .consejos { padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .resultado-container .consejos .titulo-consejos { font-size: 13px; color: #a78bfa; margin-bottom: 6px; }
+        .resultado-container .consejos .consejo { font-size: 13px; color: #a1a1aa; padding: 4px 0; }
+
+        .resultado-container .datos-faltantes { padding: 12px; border-radius: 8px; }
+        .resultado-container .datos-faltantes .titulo-faltantes { font-size: 13px; color: #f87171; }
+        .resultado-container .datos-faltantes .faltante { font-size: 13px; color: #a1a1aa; }
+        .resultado-container .datos-faltantes .sugerencia { font-size: 13px; color: #a78bfa; margin-top: 6px; }
+
+        .resultado-container .shor-result { padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 12px; }
+        .resultado-container .shor-result .numero { font-size: 32px; font-weight: 700; color: #a78bfa; }
+        .resultado-container .shor-result .factorizacion { font-size: 24px; margin: 8px 0; }
+        .resultado-container .shor-result .factorizacion .factores { color: #22c55e; font-weight: 700; }
+
+        .resultado-container .qaoa-result { padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 12px; }
+        .resultado-container .qaoa-result .titulo { font-weight: 700; color: #f59e0b; }
+        .resultado-container .qaoa-result .valor { font-size: 24px; font-weight: 700; color: #22c55e; }
+
+        .resultado-container .inteligente-result .intencion { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .resultado-container .inteligente-result .intencion .card { padding: 12px; border-radius: 8px; text-align: center; }
+        .resultado-container .inteligente-result .intencion .card .valor { font-size: 20px; font-weight: 700; color: #06b6d4; }
+        .resultado-container .inteligente-result .intencion .card .label { font-size: 12px; color: #71717a; }
+        .resultado-container .inteligente-result .recomendacion { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .resultado-container .inteligente-result .recomendacion .nombre { font-weight: 600; }
+        .resultado-container .inteligente-result .recomendacion .calidad { font-size: 12px; color: #a1a1aa; }
+        .resultado-container .inteligente-result .justificacion { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; color: #a1a1aa; white-space: pre-line; }
+        .resultado-container .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        .resultado-container .tags .tag { padding: 2px 10px; border-radius: 12px; font-size: 11px; color: #06b6d4; background: rgba(6,182,212,0.15); }
 
         .result-card { border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .result-card:hover { border-color: #7c3aed !important; transform: translateY(-3px); box-shadow: 0 8px 30px rgba(124,58,237,0.15); }
@@ -157,72 +201,9 @@
         .result-card .meta .relevance { display: inline-block; padding: 2px 10px; border-radius: 10px; background: #7c3aed; color: white; font-weight: 600; transition: transform 0.2s ease; }
         .result-card .meta .relevance:hover { transform: scale(1.05); }
         .result-card .meta .stars { color: #fbbf24; }
-        .result-card .meta .source { background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 8px; font-size: 10px; }
+        .result-card .meta .source { padding: 2px 8px; border-radius: 8px; font-size: 10px; background: rgba(255,255,255,0.05); }
         .result-card .url { font-size: 12px; margin-top: 4px; word-break: break-all; opacity: 0.7; transition: opacity 0.3s ease; }
         .result-card .url:hover { opacity: 1; }
-
-        .compras-result { border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(220,38,38,0.3); background: rgba(220,38,38,0.05); animation: fadeInUp 0.5s ease-out; }
-        .compras-result h3 { color: #dc2626; margin-bottom: 8px; font-size: 18px; }
-        .compras-result .mejor-opcion { background: rgba(220,38,38,0.1); padding: 16px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(220,38,38,0.2); }
-        .compras-result .mejor-opcion .titulo { font-size: 18px; font-weight: 700; color: #dc2626; }
-        .compras-result .mejor-opcion .detalle { margin-top: 8px; }
-        .compras-result .mejor-opcion .detalle div { padding: 2px 0; }
-        .compras-result .precios-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .compras-result .precios-grid .card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; text-align: center; }
-        .compras-result .precios-grid .card .valor { font-size: 18px; font-weight: 700; }
-        .compras-result .precios-grid .card .label { font-size: 11px; color: #71717a; }
-        .compras-result .precios-grid .card.min .valor { color: #22c55e; }
-        .compras-result .precios-grid .card.prom .valor { color: #fbbf24; }
-        .compras-result .precios-grid .card.max .valor { color: #f87171; }
-        .compras-result .consejos { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-        .compras-result .consejos .titulo-consejos { font-size: 13px; color: #a78bfa; margin-bottom: 6px; }
-        .compras-result .consejos .consejo { font-size: 13px; color: #a1a1aa; padding: 4px 0; }
-        .compras-result .datos-faltantes { background: rgba(239,68,68,0.1); padding: 12px; border-radius: 8px; border: 1px solid rgba(239,68,68,0.2); }
-        .compras-result .datos-faltantes .titulo-faltantes { font-size: 13px; color: #f87171; }
-        .compras-result .datos-faltantes .faltante { font-size: 13px; color: #a1a1aa; }
-        .compras-result .datos-faltantes .sugerencia { font-size: 13px; color: #a78bfa; margin-top: 6px; }
-
-        .cerebro-result { border-radius: 12px; padding: 16px; margin-bottom: 16px; transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease; animation: fadeInUp 0.5s ease-out; }
-        .cerebro-result:hover { box-shadow: 0 4px 20px rgba(124,58,237,0.08); }
-        .cerebro-result h3 { color: #a78bfa; margin-bottom: 8px; font-size: 18px; }
-        body.light-mode .cerebro-result h3 { color: #4f46e5; }
-        .cerebro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
-        .cerebro-card { padding: 12px; border-radius: 8px; text-align: center; transition: background 0.3s ease, transform 0.3s ease; }
-        .cerebro-card:hover { transform: scale(1.03); }
-        .cerebro-card .value { font-size: 22px; font-weight: 700; color: #a78bfa; }
-        body.light-mode .cerebro-card .value { color: #4f46e5; }
-        .cerebro-card .value.green { color: #22c55e; }
-        .cerebro-card .value.yellow { color: #fbbf24; }
-        .cerebro-card .value.blue { color: #60a5fa; }
-        .cerebro-card .label { font-size: 11px; margin-top: 4px; }
-        .cerebro-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-        .cerebro-tag { padding: 4px 12px; border-radius: 12px; font-size: 13px; transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease; }
-        .cerebro-tag:hover { transform: scale(1.05); }
-        .cerebro-grover { margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 14px; color: #a1a1aa; animation: fadeInUp 0.6s ease-out; }
-        body.light-mode .cerebro-grover { background: rgba(0,0,0,0.03); color: #4a4a5a; }
-        .cerebro-grover strong { color: #a78bfa; }
-        body.light-mode .cerebro-grover strong { color: #4f46e5; }
-
-        .inteligente-result { border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); animation: fadeInUp 0.5s ease-out; }
-        .inteligente-result h3 { color: #06b6d4; margin-bottom: 8px; font-size: 18px; }
-        .inteligente-result .intencion { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        .inteligente-result .intencion .card { background: rgba(6,182,212,0.1); padding: 12px; border-radius: 8px; text-align: center; }
-        .inteligente-result .intencion .card .valor { font-size: 20px; font-weight: 700; color: #06b6d4; }
-        .inteligente-result .intencion .card .label { font-size: 12px; color: #71717a; }
-        .inteligente-result .recomendacion { padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .inteligente-result .recomendacion .nombre { font-weight: 600; }
-        .inteligente-result .recomendacion .calidad { font-size: 12px; color: #a1a1aa; }
-        .inteligente-result .justificacion { margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px; color: #a1a1aa; white-space: pre-line; }
-
-        .shor-result { border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(220,38,38,0.3); background: rgba(220,38,38,0.05); animation: fadeInUp 0.5s ease-out; }
-        .shor-result h3 { color: #f87171; margin-bottom: 8px; font-size: 18px; }
-        .shor-result .numero { font-size: 32px; font-weight: 700; color: #a78bfa; text-align: center; }
-        .shor-result .factorizacion { font-size: 24px; text-align: center; margin: 8px 0; }
-        .shor-result .factorizacion .factores { color: #22c55e; font-weight: 700; }
-
-        .qaoa-result { border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); animation: fadeInUp 0.5s ease-out; }
-        .qaoa-result h3 { color: #fbbf24; margin-bottom: 8px; font-size: 18px; }
-        .qaoa-result .valor { font-size: 24px; font-weight: 700; color: #22c55e; text-align: center; }
 
         .loading, .no-results, .error { text-align: center; padding: 40px 20px; border-radius: 12px; transition: background 0.3s ease, border 0.3s ease, color 0.3s ease; }
         .loading .spinner { display: inline-block; width: 30px; height: 30px; border: 3px solid #1a1a26; border-top-color: #7c3aed; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
@@ -272,17 +253,20 @@
         .modal-close { float: right; opacity: 0.6; cursor: pointer; font-size: 24px; line-height: 1; transition: opacity 0.2s ease; }
         .modal-close:hover { opacity: 1; }
 
-        @media (max-width: 600px) { body { padding: 10px; } .search-box { flex-direction: column; } .search-box button { width: 100%; justify-content: center; } .header h1 { font-size: 22px; } .header-top { flex-direction: column; align-items: center; } .stats-bar { flex-direction: column; } .cerebro-grid { grid-template-columns: 1fr 1fr; } .dashboard-grid { grid-template-columns: 1fr 1fr; } .historial-item { flex-wrap: wrap; gap: 4px; } .pagination-controls { justify-content: center; } .compras-result .precios-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { body { padding: 10px; } .search-box { flex-direction: column; } .search-box button { width: 100%; justify-content: center; } .header h1 { font-size: 22px; } .header-top { flex-direction: column; align-items: center; } .stats-bar { flex-direction: column; } .resultado-container .grid-2 { grid-template-columns: 1fr 1fr; } .resultado-container .precios-grid { grid-template-columns: 1fr 1fr; } .historial-item { flex-wrap: wrap; gap: 4px; } .pagination-controls { justify-content: center; } }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
     <div class="header">
         <div class="header-top">
             <div>
-                <h1>🌐 Quantum <span>Web Search</span></h1>
-                <div class="sub">🔍 Grover + 🧠 Cerebro + 🌐 Multi Fuente + 🔬 Shor + 📊 QAOA + 🧠 Inteligente + 🛒 Compras</div>
+                <h1>🚀 Quantum <span>Web Search</span></h1>
+                <div class="sub">Un solo buscador que elige el mejor algoritmo para ti</div>
             </div>
             <div class="header-actions">
                 <span id="wsStatus" style="font-size:12px; color:#22c55e;">🟢 En vivo</span>
@@ -295,32 +279,33 @@
             </div>
         </div>
         <div class="badges">
+            <span class="badge unificado">🚀 Unificado</span>
             <span class="badge grover">⚡ Grover</span>
             <span class="badge cerebro">🧠 Cerebro</span>
-            <span class="badge multi">🌐 Multi Fuente</span>
+            <span class="badge multi">🌐 Multi</span>
             <span class="badge shor">🔬 Shor</span>
             <span class="badge qaoa">📊 QAOA</span>
-            <span class="badge inteligente">🧠 Inteligente</span>
+            <span class="badge inteligente">🧠 IA</span>
             <span class="badge compras">🛒 Compras</span>
-            <span class="badge qrng">🎲 QRNG</span>
-            <span class="badge bell">🔗 Bell</span>
-            <span class="badge vqe">⚗️ VQE</span>
         </div>
     </div>
 
-    <div id="modeIndicator" class="mode-indicator mode-grover">🔍 Modo: Grover</div>
+    <!-- ============================================================
+    MODO INDICADOR
+    ============================================================ -->
+    <div id="modeIndicator" class="mode-indicator mode-unificado">🚀 Modo: Unificado (detección automática)</div>
 
+    <!-- ============================================================
+    BUSCADOR
+    ============================================================ -->
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Busca, compra, factoriza u optimiza..." autofocus>
-        <button class="btn-search" id="searchBtn">🔍 Buscar</button>
-        <button class="btn-cerebro" id="cerebroBtn">🧠 Cerebro</button>
-        <button class="btn-multi" id="multiBtn">🌐 Multi Fuente</button>
-        <button class="btn-shor" id="shorBtn">🔬 Shor</button>
-        <button class="btn-qaoa" id="qaoaBtn">📊 QAOA</button>
-        <button class="btn-inteligente" id="inteligenteBtn">🧠 Inteligente</button>
-        <button class="btn-compras" id="comprasBtn">🛒 Compras</button>
+        <input type="text" id="searchInput" placeholder="Escribe lo que necesites... (compras, números, preguntas, etc.)" autofocus>
+        <button class="btn-unificado" id="unificadoBtn">🚀 Buscar</button>
     </div>
 
+    <!-- ============================================================
+    PAGINACIÓN
+    ============================================================ -->
     <div class="pagination-controls">
         <label style="font-size:13px; color:#a1a1aa;">📊 Resultados por página:</label>
         <select id="resultsPerPage">
@@ -336,11 +321,17 @@
         </div>
     </div>
 
+    <!-- ============================================================
+    HISTORIAL
+    ============================================================ -->
     <div class="historial-section" id="historialSection">
         <h3>📜 Historial de búsquedas</h3>
         <div id="historialList"><p style="color:#71717a; font-size:14px;">Cargando...</p></div>
     </div>
 
+    <!-- ============================================================
+    DASHBOARD
+    ============================================================ -->
     <div class="dashboard-section" id="dashboardSection">
         <h3>📊 Dashboard de estadísticas</h3>
         <div class="dashboard-grid" id="dashboardGrid">
@@ -352,15 +343,27 @@
         <div id="dashboardAlgoritmos" style="font-size:13px; color:#a1a1aa;"></div>
     </div>
 
+    <!-- ============================================================
+    STATS
+    ============================================================ -->
     <div id="statsBar"></div>
 
+    <!-- ============================================================
+    RESULTADOS
+    ============================================================ -->
     <div id="results">
-        <div class="no-results">🔍 Busca algo para ver resultados</div>
+        <div class="no-results">🚀 Escribe algo y yo elegiré el mejor algoritmo para ti</div>
     </div>
 
-    <div class="cache-info" id="cacheInfo">💾 Caché cuántico activo | ⚡ Grover | 🧠 Cerebro | 🌐 Multi Fuente | 🔬 Shor | 📊 QAOA | 🧠 Inteligente | 🛒 Compras</div>
+    <!-- ============================================================
+    CACHE INFO
+    ============================================================ -->
+    <div class="cache-info" id="cacheInfo">💾 Caché cuántico activo | 🚀 Buscador Unificado</div>
 </div>
 
+<!-- ============================================================
+MODAL DE AUTENTICACIÓN
+============================================================ -->
 <div class="modal" id="authModal">
     <div class="modal-content">
         <span class="modal-close" onclick="closeAuth()">&times;</span>
@@ -377,26 +380,29 @@
     </div>
 </div>
 
+<!-- ============================================================
+SCRIPTS
+============================================================ -->
 <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 <script>
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
 let resultadosActuales = [];
 let resultadosTotales = [];
 let paginaActual = 1;
 let resultadosPorPagina = 25;
 let isProcessing = false;
-let modoActual = 'grover';
+let modoActual = 'unificado';
 let authMode = 'login';
 let socket = null;
 let timeoutId = null;
 
+// ============================================================
+// ELEMENTOS DOM
+// ============================================================
 const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const cerebroBtn = document.getElementById('cerebroBtn');
-const multiBtn = document.getElementById('multiBtn');
-const shorBtn = document.getElementById('shorBtn');
-const qaoaBtn = document.getElementById('qaoaBtn');
-const inteligenteBtn = document.getElementById('inteligenteBtn');
-const comprasBtn = document.getElementById('comprasBtn');
+const unificadoBtn = document.getElementById('unificadoBtn');
 const resultsDiv = document.getElementById('results');
 const statsBar = document.getElementById('statsBar');
 const cacheInfo = document.getElementById('cacheInfo');
@@ -406,6 +412,9 @@ const historialList = document.getElementById('historialList');
 const dashboardSection = document.getElementById('dashboardSection');
 const wsStatus = document.getElementById('wsStatus');
 
+// ============================================================
+// MODO OSCURO/CLARO
+// ============================================================
 function toggleModo() {
     const body = document.body;
     if (body.classList.contains('dark-mode')) {
@@ -424,6 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add(modo === 'dark' ? 'dark-mode' : 'light-mode');
 });
 
+// ============================================================
+// WEBSOCKET
+// ============================================================
 function conectarWebSocket() {
     try {
         socket = io();
@@ -469,546 +481,250 @@ function mostrarResultadosInstantaneos(resultados) {
     }, 5000);
 }
 
-async function buscar() {
+// ============================================================
+// BUSCADOR UNIFICADO
+// ============================================================
+async function buscarUnificado() {
     const query = searchInput.value.trim();
     if (!query) {
         resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe algo para buscar</div>';
         return;
     }
-    if (isProcessing) return;
-    isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    searchBtn.textContent = '⏳ Buscando...';
-    modoActual = 'grover';
-    modeIndicator.textContent = '🔍 Modo: Grover';
-    modeIndicator.className = 'mode-indicator mode-grover';
-    resultsDiv.innerHTML = `<div class="loading"><div class="spinner"></div><div>🔍 Buscando con Grover...</div></div>`;
-    cacheInfo.textContent = '⏳ Buscando...';
-    try {
-        const res = await fetch('/api/buscar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, max_resultados: 100, resultados_web: 50 })
-        });
-        const data = await res.json();
-        if (data.error) {
-            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en búsqueda';
-            return;
-        }
-        if (!data.resultados || data.resultados.length === 0) {
-            resultsDiv.innerHTML = '<div class="no-results">❌ No se encontraron resultados</div>';
-            cacheInfo.textContent = '💾 Caché cuántico activo';
-            return;
-        }
-        resultadosActuales = data.resultados;
-        resultadosTotales = data.resultados;
-        paginaActual = 1;
-        mostrarPagina(paginaActual);
-        statsBar.innerHTML = `
-            <div class="stats-bar">
-                <div class="stat">📊 <strong>${data.mostrados || 0}</strong> resultados</div>
-                <div class="stat">🌐 <strong>${data.total_encontrados || 0}</strong> encontrados</div>
-                <div class="stat">⏱️ <strong>${data.tiempo?.toFixed(2) || 0}s</strong></div>
-                <div class="stat">🌀 <strong>Grover</strong></div>
-            </div>
-        `;
-        cacheInfo.textContent = '💾 Caché cuántico activo | ⚡ Grover aplicado';
-        cargarHistorial();
-        cargarDashboard();
-    } catch (e) {
-        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en la búsqueda';
-    }
-    isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    searchBtn.textContent = '🔍 Buscar';
-}
 
-async function buscarMulti() {
-    const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe algo para buscar</div>';
-        return;
-    }
     if (isProcessing) return;
     isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    multiBtn.textContent = '⏳ Buscando...';
-    modoActual = 'multi';
-    modeIndicator.textContent = '🌐 Modo: Multi Fuente';
-    modeIndicator.className = 'mode-indicator mode-multi';
+    unificadoBtn.disabled = true;
+    unificadoBtn.textContent = '⏳ Analizando...';
+    modoActual = 'unificado';
+    modeIndicator.textContent = '🚀 Modo: Unificado (detección automática)';
+    modeIndicator.className = 'mode-indicator mode-unificado';
+
     resultsDiv.innerHTML = `
         <div class="loading">
             <div class="spinner"></div>
-            <div>🌐 Buscando en múltiples fuentes...</div>
-            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Google + Wikipedia + YouTube + News</div>
+            <div>🚀 Analizando tu consulta y eligiendo el mejor algoritmo...</div>
+            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Detectando automáticamente qué algoritmo usar</div>
         </div>
     `;
-    cacheInfo.textContent = '🌐 Buscando en Multi Fuente...';
-    try {
-        const res = await fetch('/api/buscar_multi', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, max_resultados: 20 })
-        });
-        const data = await res.json();
-        if (data.error) {
-            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en Multi Fuente';
-            return;
-        }
-        if (!data.resultados || data.resultados.length === 0) {
-            resultsDiv.innerHTML = '<div class="no-results">❌ No se encontraron resultados</div>';
-            cacheInfo.textContent = '💾 Caché cuántico activo';
-            return;
-        }
-        resultadosActuales = data.resultados;
-        resultadosTotales = data.resultados;
-        paginaActual = 1;
-        let html = `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">`;
-        if (data.fuentes) {
-            data.fuentes.forEach(f => {
-                html += `<span style="background:rgba(124,58,237,0.2); padding:2px 12px; border-radius:12px; font-size:12px; color:#a78bfa;">${f}</span>`;
-            });
-        }
-        html += `</div>`;
-        statsBar.innerHTML = `
-            <div class="stats-bar">
-                <div class="stat">🌐 <strong>Multi Fuente</strong></div>
-                <div class="stat">📊 <strong>${data.resultados.length}</strong> resultados</div>
-                <div class="stat">📰 <strong>${data.fuentes?.length || 0}</strong> fuentes</div>
-            </div>
-        `;
-        resultadosTotales = data.resultados;
-        mostrarPagina(paginaActual);
-        cacheInfo.textContent = '🌐 Multi Fuente completado';
-    } catch (e) {
-        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en Multi Fuente';
-    }
-    isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    multiBtn.textContent = '🌐 Multi Fuente';
-}
+    cacheInfo.textContent = '🚀 Analizando...';
 
-async function buscarCompras() {
-    const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe qué quieres comprar (ej: "comprar termica bipolar 25 amp")</div>';
-        return;
-    }
-    if (isProcessing) return;
-    isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    comprasBtn.textContent = '⏳ Buscando...';
-    modoActual = 'compras';
-    modeIndicator.textContent = '🛒 Modo: Compras';
-    modeIndicator.className = 'mode-indicator mode-compras';
-    resultsDiv.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <div>🛒 Buscando las mejores opciones de compra...</div>
-            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Comparando precios, calificaciones y tiendas</div>
-        </div>
-    `;
-    cacheInfo.textContent = '🛒 Buscando opciones de compra...';
     try {
-        const res = await fetch('/api/compras', {
+        const res = await fetch('/api/unificado', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query })
         });
         const data = await res.json();
+
         if (data.error) {
             resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en compras';
+            cacheInfo.textContent = '⚠️ Error en la búsqueda';
             return;
         }
+
+        const resultado = data.resultado || {};
+        const algoritmo = data.algoritmo || 'QRNG';
+        const explicacion = data.explicacion || 'Procesado correctamente';
+
         let html = `
-            <div class="compras-result">
-                <h3>🛒 Recomendaciones de Compra</h3>
-                <div style="padding:16px;">
+            <div class="resultado-container">
+                <span class="algo-tag">🧠 ${algoritmo.toUpperCase()}</span>
+                <h3>🚀 Resultado Unificado</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="valor">${algoritmo.toUpperCase()}</div>
+                        <div class="label">🎯 Algoritmo usado</div>
+                    </div>
+                    <div class="card">
+                        <div class="valor" style="font-size:14px; color:#22c55e;">${explicacion}</div>
+                        <div class="label">📖 Intención detectada</div>
+                    </div>
+                </div>
         `;
-        if (data.recomendaciones?.mejor_opcion) {
-            const mejor = data.recomendaciones.mejor_opcion;
+
+        // COMPRAS
+        if (resultado.recomendaciones?.mejor_opcion) {
+            const mejor = resultado.recomendaciones.mejor_opcion;
             html += `
                 <div class="mejor-opcion">
                     <div class="titulo">⭐ Mejor Opción</div>
                     <div class="detalle">
                         <div><strong>📦 Producto:</strong> ${mejor.nombre}</div>
-                        <div><strong>💰 Precio:</strong> $${mejor.precio.toLocaleString()}</div>
+                        <div><strong>💰 Precio:</strong> $${mejor.precio?.toLocaleString()}</div>
                         <div><strong>⭐ Calificación:</strong> ${mejor.calificacion}/5</div>
                         <div><strong>🏷️ Tienda:</strong> ${mejor.tienda}</div>
                         <div><strong>📊 Puntuación:</strong> ${mejor.puntuacion}</div>
                     </div>
                 </div>
-            `;
-        }
-        if (data.recomendaciones) {
-            html += `
                 <div class="precios-grid">
                     <div class="card min">
-                        <div class="valor">$${data.recomendaciones.precio_minimo?.toLocaleString()}</div>
+                        <div class="valor">$${resultado.recomendaciones.precio_minimo?.toLocaleString()}</div>
                         <div class="label">💰 Precio mínimo</div>
                     </div>
                     <div class="card prom">
-                        <div class="valor">$${data.recomendaciones.precio_promedio?.toLocaleString()}</div>
+                        <div class="valor">$${resultado.recomendaciones.precio_promedio?.toLocaleString()}</div>
                         <div class="label">📊 Precio promedio</div>
                     </div>
                     <div class="card max">
-                        <div class="valor">$${data.recomendaciones.precio_maximo?.toLocaleString()}</div>
+                        <div class="valor">$${resultado.recomendaciones.precio_maximo?.toLocaleString()}</div>
                         <div class="label">💰 Precio máximo</div>
                     </div>
                 </div>
             `;
+            if (resultado.recomendaciones.consejos) {
+                html += `
+                    <div class="consejos">
+                        <div class="titulo-consejos">💡 Consejos:</div>
+                        ${resultado.recomendaciones.consejos.map(c => `<div class="consejo">• ${c}</div>`).join('')}
+                    </div>
+                `;
+            }
+            if (resultado.necesita_datos) {
+                html += `
+                    <div class="datos-faltantes">
+                        <div class="titulo-faltantes">⚠️ Datos faltantes:</div>
+                        ${!resultado.intencion?.producto ? '<div class="faltante">• No especificaste el producto claramente</div>' : ''}
+                        ${!resultado.intencion?.precio_estimado ? '<div class="faltante">• No especificaste un presupuesto</div>' : ''}
+                        ${!resultado.intencion?.ubicacion ? '<div class="faltante">• No especificaste tu ubicación</div>' : ''}
+                        <div class="sugerencia">💡 Sugerencia: "comprar termica bipolar 25 amp por menos de $15000 en Buenos Aires"</div>
+                    </div>
+                `;
+            }
         }
-        if (data.recomendaciones?.consejos) {
-            html += `
-                <div class="consejos">
-                    <div class="titulo-consejos">💡 Consejos:</div>
-                    ${data.recomendaciones.consejos.map(c => `<div class="consejo">• ${c}</div>`).join('')}
-                </div>
-            `;
-        }
-        if (data.necesita_datos) {
-            html += `
-                <div class="datos-faltantes">
-                    <div class="titulo-faltantes">⚠️ Datos faltantes:</div>
-                    ${!data.intencion?.producto ? '<div class="faltante">• No especificaste el producto claramente</div>' : ''}
-                    ${!data.intencion?.precio_estimado ? '<div class="faltante">• No especificaste un presupuesto</div>' : ''}
-                    ${!data.intencion?.ubicacion ? '<div class="faltante">• No especificaste tu ubicación</div>' : ''}
-                    <div class="sugerencia">💡 Sugerencia: "comprar termica bipolar 25 amp por menos de $15000 en Buenos Aires"</div>
-                </div>
-            `;
-        }
-        html += `</div></div>`;
-        resultsDiv.innerHTML = html;
-        statsBar.innerHTML = `
-            <div class="stats-bar">
-                <div class="stat">🛒 <strong>Compras</strong></div>
-                <div class="stat">📊 <strong>${data.recomendaciones?.total_opciones || 0}</strong> opciones</div>
-            </div>
-        `;
-        cacheInfo.textContent = '🛒 Compras completado';
-    } catch (e) {
-        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en compras';
-    }
-    isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    comprasBtn.textContent = '🛒 Compras';
-}
 
-async function buscarInteligente() {
-    const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe algo para buscar</div>';
-        return;
-    }
-    if (isProcessing) return;
-    isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    inteligenteBtn.textContent = '⏳ Pensando...';
-    modoActual = 'inteligente';
-    modeIndicator.textContent = '🧠 Modo: Inteligente';
-    modeIndicator.className = 'mode-indicator mode-inteligente';
-    resultsDiv.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <div>🧠 Analizando tu consulta con inteligencia cuántica...</div>
-            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Usando todos los algoritmos para recomendarte lo mejor</div>
-        </div>
-    `;
-    cacheInfo.textContent = '🧠 Analizando con inteligencia...';
-    try {
-        const res = await fetch('/api/inteligente', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
-        });
-        const data = await res.json();
-        if (data.error) {
-            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en inteligente';
-            return;
+        // SHOR
+        if (resultado.factorizacion) {
+            const esPrimo = resultado.factores?.[1] === 1;
+            html += `
+                <div class="shor-result">
+                    <div class="numero">${resultado.numero}</div>
+                    <div class="factorizacion">= <span class="factores">${resultado.factores?.[0]} × ${resultado.factores?.[1]}</span></div>
+                    <div style="font-size:14px; color:#a1a1aa;">
+                        ${esPrimo ? '🔒 Número primo' : '✅ Factorización exitosa'}
+                    </div>
+                </div>
+            `;
         }
-        let html = `
-            <div class="inteligente-result">
-                <h3>🧠 Resultado Inteligente</h3>
-                <div style="padding:16px;">
+
+        // QAOA
+        if (resultado.mejor_estado) {
+            html += `
+                <div class="qaoa-result">
+                    <div class="titulo">📊 Optimizado</div>
+                    <div style="margin:4px 0;">Mejor estado: <strong>${resultado.mejor_estado}</strong></div>
+                    ${resultado.valor_total ? `<div class="valor">💰 Valor: ${resultado.valor_total}</div>` : ''}
+                    ${resultado.explicacion ? `<div style="font-size:13px; color:#a1a1aa; margin-top:4px;">💡 ${resultado.explicacion}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // INTELIGENTE
+        if (resultado.intencion) {
+            html += `
+                <div class="inteligente-result">
                     <div class="intencion">
                         <div class="card">
-                            <div class="valor">${data.intencion?.intencion || 'General'}</div>
+                            <div class="valor">${resultado.intencion.intencion || 'General'}</div>
                             <div class="label">🎯 Intención detectada</div>
                         </div>
                         <div class="card">
-                            <div class="valor">${(data.intencion?.prioridad * 100).toFixed(0)}%</div>
+                            <div class="valor">${resultado.intencion.prioridad ? (resultado.intencion.prioridad * 100).toFixed(0) : '0'}%</div>
                             <div class="label">📊 Prioridad</div>
                         </div>
                     </div>
-        `;
-        if (data.recomendaciones?.recomendaciones) {
-            html += `<div style="margin-top:12px; margin-bottom:8px; font-size:14px; color:#a78bfa;">⭐ Recomendaciones:</div>`;
-            data.recomendaciones.recomendaciones.slice(0, 5).forEach((r, i) => {
-                const titulo = r.titulo || 'Sin título';
-                const calidad = r.calidad || 0;
-                const fuente = r.fuente || 'Web';
+            `;
+            if (resultado.recomendaciones?.recomendaciones) {
+                html += `<div style="margin-top:8px; font-size:14px; color:#a78bfa;">⭐ Recomendaciones:</div>`;
+                resultado.recomendaciones.recomendaciones.slice(0, 5).forEach((r, i) => {
+                    html += `
+                        <div class="recomendacion">
+                            <span class="nombre">${i+1}. ${r.titulo || 'Sin título'}</span>
+                            <span class="calidad">📊 ${r.calidad?.toFixed(4) || '0'} | ${r.fuente || 'Web'}</span>
+                        </div>
+                    `;
+                });
+            }
+            if (resultado.recomendaciones?.justificacion) {
                 html += `
-                    <div class="recomendacion">
-                        <span class="nombre">${i+1}. ${titulo}</span>
-                        <span class="calidad">📊 ${calidad.toFixed(4)} | ${fuente}</span>
+                    <div class="justificacion">💡 ${resultado.recomendaciones.justificacion}</div>
+                `;
+            }
+            if (resultado.metodos_usados) {
+                html += `
+                    <div class="tags">
+                        ${resultado.metodos_usados.map(m => `<span class="tag">${m}</span>`).join('')}
+                    </div>
+                `;
+            }
+            html += `</div>`;
+        }
+
+        // GROVER (resultados de búsqueda)
+        if (resultado.resultados && resultado.resultados.length > 0 && !resultado.recomendaciones?.mejor_opcion) {
+            html += `<div style="margin-top:8px; font-size:14px; color:#a78bfa;">🔍 Resultados encontrados:</div>`;
+            resultado.resultados.slice(0, 10).forEach((r, i) => {
+                html += `
+                    <div class="result-card">
+                        <div class="title"><a href="${r.url || '#'}" target="_blank">${i+1}. ${r.titulo || 'Sin título'}</a></div>
+                        <div class="desc">${r.descripcion || ''}</div>
+                        <div class="meta">
+                            <span class="relevance">📊 ${r.relevancia || 0}</span>
+                            <span class="stars">${'⭐'.repeat(Math.min(Math.floor((r.relevancia || 0) / 2), 5))}</span>
+                            <span class="source">${r.fuente || 'Web'}</span>
+                        </div>
+                        <div class="url">🔗 ${r.url || '#'}</div>
                     </div>
                 `;
             });
         }
-        if (data.recomendaciones?.justificacion) {
-            html += `
-                <div class="justificacion">
-                    💡 ${data.recomendaciones.justificacion}
-                </div>
-            `;
-        }
-        if (data.metodos_usados) {
-            html += `
-                <div style="margin-top:12px; display:flex; gap:6px; flex-wrap:wrap;">
-                    ${data.metodos_usados.map(m => `<span style="background:rgba(6,182,212,0.15); padding:2px 10px; border-radius:12px; font-size:11px; color:#06b6d4;">${m}</span>`).join('')}
-                </div>
-            `;
-        }
-        html += `</div></div>`;
-        resultsDiv.innerHTML = html;
-        statsBar.innerHTML = `
-            <div class="stats-bar">
-                <div class="stat">🧠 <strong>Inteligente</strong></div>
-                <div class="stat">📊 <strong>${data.metodos_usados?.length || 0}</strong> algoritmos</div>
-            </div>
-        `;
-        cacheInfo.textContent = '🧠 Inteligente completado';
-    } catch (e) {
-        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en inteligente';
-    }
-    isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    inteligenteBtn.textContent = '🧠 Inteligente';
-}
 
-async function ejecutarQAOA() {
-    const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe un problema de optimización (ej: "mochila 8")</div>';
-        return;
-    }
-    if (isProcessing) return;
-    isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    qaoaBtn.textContent = '⏳ Optimizando...';
-    modoActual = 'qaoa';
-    modeIndicator.textContent = '📊 Modo: QAOA (Optimización)';
-    modeIndicator.className = 'mode-indicator mode-qaoa';
-    resultsDiv.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <div>📊 Optimizando con QAOA...</div>
-            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Algoritmo de optimización cuántica</div>
-        </div>
-    `;
-    cacheInfo.textContent = '📊 Optimizando con QAOA...';
-    try {
-        const esMochila = query.toLowerCase().includes('mochila');
-        let body = { problema: 'qaoa' };
-        if (esMochila) {
-            const partes = query.split(' ');
-            const capacidad = parseInt(partes[partes.length - 1]) || 8;
-            body = { problema: 'mochila', pesos: [2, 3, 4, 5], valores: [3, 4, 5, 6], capacidad: capacidad };
-        }
-        const res = await fetch('/api/qaoa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        const data = await res.json();
-        if (data.error) {
-            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en QAOA';
-            return;
-        }
-        let html = `
-            <div class="qaoa-result">
-                <h3>📊 Resultado de QAOA</h3>
-                <div style="padding:16px;">
-        `;
-        if (data.mejor_estado !== undefined) {
+        // CEREBRO
+        if (resultado.id) {
             html += `
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:8px;">
                     <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                        <div style="font-size:24px; font-weight:700; color:#f59e0b;">${data.mejor_estado}</div>
-                        <div style="font-size:12px; color:#71717a;">Mejor estado</div>
+                        <div style="font-size:20px; font-weight:700; color:#a78bfa;">${resultado.id}</div>
+                        <div style="font-size:11px; color:#71717a;">🎲 ID (QRNG)</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                        <div style="font-size:24px; font-weight:700; color:#22c55e;">${data.energia || data.valor_total}</div>
-                        <div style="font-size:12px; color:#71717a;">${data.valor_total ? 'Valor total' : 'Energía'}</div>
+                        <div style="font-size:20px; font-weight:700; color:${resultado.seguridad?.encriptada ? '#22c55e' : '#ef4444'};">${resultado.seguridad?.encriptada ? '🔒 Sí' : '🔓 No'}</div>
+                        <div style="font-size:11px; color:#71717a;">🔗 Encriptación</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
+                        <div style="font-size:20px; font-weight:700; color:#fbbf24;">${resultado.tendencias?.cadena_encontrada || 'N/A'}</div>
+                        <div style="font-size:11px; color:#71717a;">🔐 Patrón detectado</div>
                     </div>
                 </div>
             `;
         }
-        if (data.explicacion) {
-            html += `<div style="margin-top:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:14px; color:#a1a1aa;">💡 ${data.explicacion}</div>`;
-        }
-        html += `</div></div>`;
+
+        html += `</div>`;
         resultsDiv.innerHTML = html;
+
         statsBar.innerHTML = `
             <div class="stats-bar">
-                <div class="stat">📊 <strong>QAOA</strong></div>
-                <div class="stat">✅ <strong>Optimizado</strong></div>
+                <div class="stat">🚀 <strong>Unificado</strong></div>
+                <div class="stat">🧠 <strong>${algoritmo.toUpperCase()}</strong></div>
             </div>
         `;
-        cacheInfo.textContent = '📊 QAOA completado';
+
+        cacheInfo.textContent = `🚀 Búsqueda completada con ${algoritmo.toUpperCase()}`;
+        cargarHistorial();
+        cargarDashboard();
+
     } catch (e) {
         resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en QAOA';
+        cacheInfo.textContent = '⚠️ Error en la búsqueda';
     }
+
     isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    qaoaBtn.textContent = '📊 QAOA';
+    unificadoBtn.disabled = false;
+    unificadoBtn.textContent = '🚀 Buscar';
 }
 
-async function ejecutarShor() {
-    const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe un número para factorizar (ej: 15, 21, 35)</div>';
-        return;
-    }
-    const numero = parseInt(query);
-    if (isNaN(numero) || numero < 2) {
-        resultsDiv.innerHTML = '<div class="error">❌ Escribe un número entero mayor que 1</div>';
-        return;
-    }
-    if (isProcessing) return;
-    isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    shorBtn.textContent = '⏳ Factorizando...';
-    modoActual = 'shor';
-    modeIndicator.textContent = '🔬 Modo: Shor (Factorización)';
-    modeIndicator.className = 'mode-indicator mode-shor';
-    resultsDiv.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <div>🔬 Factorizando ${numero} con Shor...</div>
-            <div style="font-size:12px; opacity:0.6; margin-top:8px;">Algoritmo de factorización cuántica</div>
-        </div>
-    `;
-    cacheInfo.textContent = '🔬 Factorizando con Shor...';
-    try {
-        const res = await fetch('/api/shor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ numero }) });
-        const data = await res.json();
-        if (data.error) {
-            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en Shor';
-            return;
-        }
-        const esPrimo = data.factores[1] === 1;
-        resultsDiv.innerHTML = `
-            <div class="shor-result">
-                <h3>🔬 Resultado de Shor</h3>
-                <div style="padding:16px; text-align:center;">
-                    <div class="numero">${data.numero}</div>
-                    <div class="factorizacion">= <span class="factores">${data.factores[0]} × ${data.factores[1]}</span></div>
-                    <div style="margin-top:12px; font-size:14px; color:#a1a1aa;">
-                        ${esPrimo ? '🔒 Número primo' : '✅ Factorización exitosa'}
-                    </div>
-                    <div style="margin-top:8px; font-size:12px; color:#71717a;">
-                        ${esPrimo ? 'El número no tiene factores primos' : 'Factores encontrados con el algoritmo de Shor'}
-                    </div>
-                </div>
-            </div>
-        `;
-        statsBar.innerHTML = `
-            <div class="stats-bar">
-                <div class="stat">🔬 <strong>Shor</strong></div>
-                <div class="stat">📊 <strong>${data.numero}</strong></div>
-                <div class="stat">✅ <strong>${esPrimo ? 'Primo' : `${data.factores[0]} × ${data.factores[1]}`}</strong></div>
-            </div>
-        `;
-        cacheInfo.textContent = '🔬 Shor completado';
-    } catch (e) {
-        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en Shor';
-    }
-    isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    shorBtn.textContent = '🔬 Shor';
-}
-
+// ============================================================
+// PAGINACIÓN
+// ============================================================
 function mostrarPagina(pagina) {
     const inicio = (pagina - 1) * resultadosPorPagina;
     const fin = inicio + resultadosPorPagina;
@@ -1062,89 +778,9 @@ document.getElementById('resultsPerPage').addEventListener('change', function() 
 document.getElementById('prevPageBtn').addEventListener('click', () => cambiarPagina(-1));
 document.getElementById('nextPageBtn').addEventListener('click', () => cambiarPagina(1));
 
-async function ejecutarCerebro() {
-    const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '<div class="no-results">✏️ Escribe algo para procesar</div>';
-        return;
-    }
-    if (isProcessing) return;
-    isProcessing = true;
-    searchBtn.disabled = true;
-    cerebroBtn.disabled = true;
-    multiBtn.disabled = true;
-    shorBtn.disabled = true;
-    qaoaBtn.disabled = true;
-    inteligenteBtn.disabled = true;
-    comprasBtn.disabled = true;
-    cerebroBtn.textContent = '⏳ Procesando...';
-    modoActual = 'cerebro';
-    modeIndicator.textContent = '🧠 Modo: Cerebro Cuántico';
-    modeIndicator.className = 'mode-indicator mode-cerebro';
-    resultsDiv.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <div>🧠 Procesando con TODOS los algoritmos cuánticos...</div>
-            <div style="font-size:12px; opacity:0.6; margin-top:8px;">QRNG + Grover + Bell + Teleport + VQE + DJ + BV</div>
-        </div>
-    `;
-    cacheInfo.textContent = '🧠 Procesando con el Cerebro...';
-    try {
-        const res = await fetch('/api/cerebro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
-        const data = await res.json();
-        if (data.error) {
-            resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
-            cacheInfo.textContent = '⚠️ Error en cerebro';
-            return;
-        }
-        statsBar.innerHTML = `<div class="stats-bar"><div class="stat">🧠 <strong>Cerebro Cuántico</strong></div><div class="stat">⚡ <strong>Todos los algoritmos</strong></div></div>`;
-        let html = `
-            <div class="cerebro-result">
-                <h3>🧠 Resultado del Cerebro Cuántico</h3>
-                <div class="cerebro-grid">
-                    <div class="cerebro-card"><div class="value">${data.id || 'N/A'}</div><div class="label">🎲 ID único (QRNG)</div></div>
-                    <div class="cerebro-card"><div class="value ${data.seguridad?.encriptada ? 'green' : 'red'}">${data.seguridad?.encriptada ? '🔒 Sí' : '🔓 No'}</div><div class="label">🔗 Encriptación (Bell)</div></div>
-                    <div class="cerebro-card"><div class="value yellow">${data.tendencias?.cadena_encontrada || 'N/A'}</div><div class="label">🔐 Patrón (Bernstein-Vazirani)</div></div>
-                    <div class="cerebro-card"><div class="value blue">${(data.seguridad?.fidelidad * 100).toFixed(1) || '0'}%</div><div class="label">📡 Fidelidad (Teleportación)</div></div>
-                </div>
-        `;
-        if (data.optimizacion && data.optimizacion.length > 0) {
-            html += `
-                <div style="margin-top:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:8px;">
-                    <div style="font-size:13px; opacity:0.7;">⚗️ Optimización de palabras (VQE):</div>
-                    <div class="cerebro-tags">`;
-            data.optimizacion.forEach(opt => {
-                html += `<span class="cerebro-tag">${opt.palabra}: ${opt.energia?.toFixed(4) || '0'} Ha</span>`;
-            });
-            html += `</div></div>`;
-        }
-        if (data.resultados_busqueda?.estado_encontrado) {
-            html += `
-                <div class="cerebro-grover">
-                    🔍 <strong>Grover:</strong> Elemento encontrado: <strong>${data.resultados_busqueda.estado_encontrado}</strong>
-                    (${(data.resultados_busqueda.tasa_exito * 100).toFixed(1)}% éxito)
-                </div>
-            `;
-        }
-        html += `</div>`;
-        resultsDiv.innerHTML = html;
-        cacheInfo.textContent = '🧠 Cerebro completado | Todos los algoritmos aplicados';
-        cargarHistorial();
-    } catch (e) {
-        resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
-        cacheInfo.textContent = '⚠️ Error en cerebro';
-    }
-    isProcessing = false;
-    searchBtn.disabled = false;
-    cerebroBtn.disabled = false;
-    multiBtn.disabled = false;
-    shorBtn.disabled = false;
-    qaoaBtn.disabled = false;
-    inteligenteBtn.disabled = false;
-    comprasBtn.disabled = false;
-    cerebroBtn.textContent = '🧠 Cerebro';
-}
-
+// ============================================================
+// HISTORIAL
+// ============================================================
 async function cargarHistorial() {
     try {
         const res = await fetch('/api/historial');
@@ -1171,6 +807,9 @@ function toggleHistorial() {
     if (section.classList.contains('show')) cargarHistorial();
 }
 
+// ============================================================
+// DASHBOARD
+// ============================================================
 async function cargarDashboard() {
     try {
         const res = await fetch('/api/estadisticas_db');
@@ -1198,6 +837,9 @@ function toggleDashboard() {
     if (section.classList.contains('show')) cargarDashboard();
 }
 
+// ============================================================
+// EXPORTACIÓN
+// ============================================================
 async function exportarResultados(formato) {
     if (!resultadosActuales || resultadosActuales.length === 0) {
         alert('No hay resultados para exportar. Realiza una búsqueda primero.');
@@ -1222,6 +864,9 @@ async function exportarResultados(formato) {
     }
 }
 
+// ============================================================
+// AUTENTICACIÓN
+// ============================================================
 function openAuth() {
     document.getElementById('authModal').classList.add('show');
 }
@@ -1259,6 +904,9 @@ async function authSubmit() {
     } catch (e) { alert('Error: ' + e.message); }
 }
 
+// ============================================================
+// WEBSOCKET - BÚSQUEDA EN TIEMPO REAL (al escribir)
+// ============================================================
 searchInput.addEventListener('input', function() {
     const query = this.value.trim();
     if (query.length >= 3 && socket && socket.connected) {
@@ -1274,26 +922,18 @@ searchInput.addEventListener('input', function() {
     }
 });
 
-searchBtn.addEventListener('click', buscar);
-cerebroBtn.addEventListener('click', ejecutarCerebro);
-multiBtn.addEventListener('click', buscarMulti);
-shorBtn.addEventListener('click', ejecutarShor);
-qaoaBtn.addEventListener('click', ejecutarQAOA);
-inteligenteBtn.addEventListener('click', buscarInteligente);
-comprasBtn.addEventListener('click', buscarCompras);
+// ============================================================
+// EVENTOS
+// ============================================================
+unificadoBtn.addEventListener('click', buscarUnificado);
 
 searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-        if (modoActual === 'cerebro') ejecutarCerebro();
-        else if (modoActual === 'multi') buscarMulti();
-        else if (modoActual === 'shor') ejecutarShor();
-        else if (modoActual === 'qaoa') ejecutarQAOA();
-        else if (modoActual === 'inteligente') buscarInteligente();
-        else if (modoActual === 'compras') buscarCompras();
-        else buscar();
-    }
+    if (e.key === 'Enter') buscarUnificado();
 });
 
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
 conectarWebSocket();
 cargarHistorial();
 cargarDashboard();
