@@ -362,6 +362,25 @@ def compras():
         return jsonify(resultado)
     except Exception as e:
         return jsonify({"error": str(e)})
+
+@app.route('/api/unificado', methods=['POST'])
+def unificado():
+    data = request.json
+    query = data.get('query', '')
+    
+    if not query:
+        return jsonify({"error": "Escribe una consulta"})
+    
+    try:
+        from unified_search import UnifiedSearch
+        buscador = UnifiedSearch()
+        resultado = buscador.buscar(query)
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+@app.route('/api/test', methods=['GET'])
+def test():
+    return jsonify({"status": "ok", "message": "Servidor funcionando"})
 # ================================================================
 # INICIO
 # ================================================================
