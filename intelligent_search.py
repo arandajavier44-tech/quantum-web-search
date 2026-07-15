@@ -1,382 +1,316 @@
-"""
-BUSCADOR INTELIGENTE - Sistema de recomendación con algoritmos cuánticos
-RUTA: C:/Users/elpel/OneDrive/Desktop/QuantumWebSearch/intelligent_search.py
-"""
+# intelligent_search.py - Versión mejorada con más funcionalidades
 
 import json
 import numpy as np
 from datetime import datetime
-from collections import defaultdict
-from quantum_bridge import QuantumBridge
+from collections import defaultdict, Counter
+from typing import List, Dict, Optional, Tuple
+from dataclasses import dataclass, asdict
+import re
 
+@dataclass
+class QueryAnalysis:
+    """Análisis de una consulta."""
+    query: str
+    intencion: str
+    palabras_clave: List[str]
+    entidades: List[str]
+    prioridad: float
+    timestamp: datetime
 
 class IntelligentSearch:
-    """
-    Buscador inteligente que combina todos los algoritmos cuánticos
-    para recomendar las mejores opciones según las necesidades del usuario.
-    """
+    """Buscador inteligente mejorado."""
     
     def __init__(self):
         self.bridge = QuantumBridge()
         self.historial_usuario = []
-        self.perfil_usuario = {
+        self.perfil_usuario = self._init_perfil()
+        self.recomendaciones_cache = {}
+        self.modelo_confianza = {}
+        
+        # Configuración
+        self.config = {
+            "max_recomendaciones": 10,
+            "umbral_confianza": 0.6,
+            "peso_reciente": 0.3,
+            "peso_frecuencia": 0.4,
+            "peso_relevancia": 0.3
+        }
+        
+        # Diccionarios de intención
+        self.intenciones = {
+            "compra": ["comprar", "precio", "oferta", "descuento", "costo", "cuanto", "cuesta"],
+            "informacion": ["qué es", "como", "cuando", "donde", "quien", "por qué", "significa", "definición"],
+            "recomendacion": ["mejor", "top", "ranking", "recomienda", "sugiere", "mejor", "ideal"],
+            "navegacion": ["ruta", "camino", "distancia", "tiempo", "llegar", "ubicación"],
+            "optimizacion": ["optimizar", "mejorar", "eficiencia", "rendimiento"],
+            "comparacion": ["vs", "versus", "comparar", "diferencia", "mejor que"],
+            "tutorial": ["tutorial", "guía", "aprender", "curso", "introducción"]
+        }
+    
+    def _init_perfil(self) -> Dict:
+        """Inicializa el perfil del usuario."""
+        return {
             "preferencias": defaultdict(int),
             "categorias": defaultdict(int),
             "fuentes": defaultdict(int),
             "palabras_clave": defaultdict(int),
+            "entidades": defaultdict(int),
             "clics": 0,
-            "busquedas": 0
+            "busquedas": 0,
+            "feedback_positivo": 0,
+            "feedback_negativo": 0,
+            "ultima_actividad": None,
+            "nivel_experiencia": "intermedio"  # principiante, intermedio, avanzado
         }
-        self.recomendaciones_cache = {}
     
-    # ================================================================
-    # 1. ANÁLISIS DE INTENCIÓN (Bernstein-Vazirani + VQE)
-    # ================================================================
+    def analizar_intencion(self, query: str) -> QueryAnalysis:
+        """Analiza la intención del usuario de forma más precisa."""
+        query_lower = query.lower()
+        palabras = query_lower.split()
+        
+        # Detectar intención con puntuación
+        puntuaciones = {}
+        for intencion, palabras_clave in self.intenciones.items():
+            puntuacion = sum(1 for p in palabras if p in palabras_clave)
+            puntuacion += sum(1 for p in palabras_clave if p in query_lower) * 0.5
+            if puntuacion > 0:
+                puntuaciones[intencion] = puntuacion
+        
+        # Intención principal
+        intencion_principal = max(puntuaciones, key=puntuaciones.get) if puntuaciones else "general"
+        
+        # Extraer entidades (nombres propios, marcas, etc.)
+        entidades = self._extraer_entidades(query)
+        
+        # Palabras clave relevantes
+        palabras_clave = [p for p in palabras if len(p) > 3 and p not in self._get_stopwords()]
+        
+        # Calcular prioridad
+        prioridad = self._calcular_prioridad(query, intencion_principal)
+        
+        return QueryAnalysis(
+            query=query,
+            intencion=intencion_principal,
+            palabras_clave=palabras_clave,
+            entidades=entidades,
+            prioridad=prioridad,
+            timestamp=datetime.now()
+        )
     
-    def analizar_intencion(self, query):
-        """
-        Analiza la intención del usuario usando Bernstein-Vazirani
-        y VQE para determinar qué busca realmente.
-        """
-        print(f"🧠 Analizando intención: '{query}'")
+    def _extraer_entidades(self, query: str) -> List[str]:
+        """Extrae entidades de la consulta."""
+        # Patrones para detectar entidades
+        patrones = {
+            "marca": r'\b(Acer|Asus|Dell|HP|Lenovo|Samsung|Apple|Sony|Nike|Adidas|Fender|Gibson)\b',
+            "producto": r'\b(laptop|teléfono|celular|computadora|tablet|guitarra|zapatillas|auriculares)\b',
+            "ubicacion": r'\b(calle|avenida|barrio|ciudad|pueblo)\b'
+        }
         
-        # 1. Bernstein-Vazirani: detecta patrones en la consulta
-        patron = self.bridge.conectar(f"descubre el patrón en {query}")
-        patron_encontrado = patron["resultado"].get("cadena_encontrada", "000")
+        entidades = []
+        for tipo, patron in patrones.items():
+            matches = re.findall(patron, query, re.IGNORECASE)
+            entidades.extend(matches)
         
-        # 2. VQE: optimiza palabras clave para entender prioridad
-        palabras = query.split()
-        energias = []
-        for p in palabras[:5]:
-            res = self.bridge.conectar(f"simula la energía de {p}")
-            energias.append({
-                "palabra": p,
-                "energia": res["resultado"].get("energia", -1)
-            })
-        
-        # 3. Clasificar intención
-        intencion = self._clasificar_intencion(query, energias)
-        
+        return entidades
+    
+    def _get_stopwords(self) -> set:
+        """Palabras vacías en español."""
         return {
-            "intencion": intencion,
-            "patron": patron_encontrado,
-            "palabras_clave": energias,
-            "prioridad": self._calcular_prioridad(energias)
+            "el", "la", "los", "las", "un", "una", "unos", "unas",
+            "de", "del", "al", "a", "ante", "bajo", "con", "contra",
+            "en", "entre", "hacia", "hasta", "para", "por", "según",
+            "sin", "sobre", "tras", "y", "o", "pero", "porque", "sino",
+            "que", "cual", "quien", "donde", "cuando", "como"
         }
     
-    def _clasificar_intencion(self, query, energias):
-        """
-        Clasifica la intención del usuario basado en la consulta.
-        """
+    def _calcular_prioridad(self, query: str, intencion: str) -> float:
+        """Calcula la prioridad de la consulta."""
+        # Factores de prioridad
+        factores = {
+            "longitud": min(len(query.split()) / 10, 1.0),
+            "especificidad": 0.5 if any(c.isdigit() for c in query) else 0.3,
+            "urgencia": 0.7 if any(w in query.lower() for w in ["urgente", "rapido", "ahora"]) else 0.3,
+            "intencion_compra": 0.8 if intencion == "compra" else 0.2,
+            "historial": self._prioridad_por_historial(query)
+        }
+        
+        return sum(factores.values()) / len(factores)
+    
+    def _prioridad_por_historial(self, query: str) -> float:
+        """Calcula prioridad basada en historial."""
+        if not self.historial_usuario:
+            return 0.5
+        
+        # Verificar si la consulta es similar a anteriores
+        queries_anteriores = [h.get("query", "").lower() for h in self.historial_usuario[-20:]]
         query_lower = query.lower()
         
-        # Detectar intención
-        if any(w in query_lower for w in ["precio", "barato", "costo", "cuanto", "cuesta", "oferta"]):
-            return "comparar_precios"
-        elif any(w in query_lower for w in ["mejor", "top", "ranking", "recomienda", "sugiere"]):
-            return "recomendacion"
-        elif any(w in query_lower for w in ["donde", "como", "cuando", "quien", "que es", "que significa"]):
-            return "informacion"
-        elif any(w in query_lower for w in ["ruta", "camino", "distancia", "tiempo", "llegar"]):
-            return "navegacion"
-        elif any(w in query_lower for w in ["resolver", "calcular", "optimizar", "mejorar"]):
-            return "optimizacion"
-        else:
-            return "busqueda_general"
+        for q in queries_anteriores:
+            if query_lower in q or q in query_lower:
+                return 0.8
+        
+        return 0.3
     
-    def _calcular_prioridad(self, energias):
-        """
-        Calcula la prioridad basada en energías VQE.
-        """
-        if not energias:
-            return 0.5
-        
-        # Promedio de energías (más negativa = más prioritaria)
-        energias_vals = [e["energia"] for e in energias if e["energia"] < 0]
-        if not energias_vals:
-            return 0.5
-        
-        promedio = abs(sum(energias_vals) / len(energias_vals))
-        # Normalizar entre 0 y 1
-        return min(promedio / 2, 1.0)
-    
-    # ================================================================
-    # 2. BÚSQUEDA OPTIMIZADA (Grover)
-    # ================================================================
-    
-    def buscar_optimizado(self, query, intencion_analisis, max_resultados=20):
-        """
-        Busca usando Grover optimizado según la intención.
-        """
-        print(f"🔍 Buscando optimizado para: '{query}'")
-        
-        # 1. Grover busca en internet
-        resultado_grover = self.bridge.conectar(f"busca {query} en internet")
-        resultados_web = resultado_grover["resultado"].get("conteos", {})
-        
-        # 2. Si hay pocos resultados, usar Multi Fuente
-        if len(resultados_web) < 3:
-            from multi_search import MultiSearch
-            multi = MultiSearch()
-            resultados_web = multi.buscar_en_todas(query, max_por_fuente=5)
-        
-        # 3. Ponderar según intención
-        resultados_ponderados = self._ponderar_resultados(
-            resultados_web, 
-            intencion_analisis,
-            max_resultados
-        )
-        
-        return resultados_ponderados
-    
-    def _ponderar_resultados(self, resultados, intencion, max_resultados):
-        """
-        Ponderar resultados según la intención del usuario.
-        """
-        if not resultados:
-            return []
-        
-        # Convertir a lista si es dict
-        if isinstance(resultados, dict):
-            resultados = [{"estado": k, "frecuencia": v} for k, v in resultados.items()]
-        
-        for r in resultados:
-            puntuacion = 0
-            
-            # Factores según intención
-            if intencion["intencion"] == "comparar_precios":
-                # Priorizar resultados con números (precios)
-                texto = r.get("titulo", "") + " " + r.get("descripcion", "")
-                if any(c.isdigit() for c in texto):
-                    puntuacion += 3
-                if "$" in texto or "€" in texto or "USD" in texto:
-                    puntuacion += 5
-            
-            elif intencion["intencion"] == "recomendacion":
-                # Priorizar resultados con palabras de calidad
-                texto = r.get("titulo", "") + " " + r.get("descripcion", "")
-                palabras_buenas = ["mejor", "top", "ranking", "recomendado", "premium", "excelente"]
-                for p in palabras_buenas:
-                    if p in texto.lower():
-                        puntuacion += 2
-            
-            elif intencion["intencion"] == "navegacion":
-                # Priorizar resultados con mapas o distancias
-                texto = r.get("titulo", "") + " " + r.get("descripcion", "")
-                if any(w in texto.lower() for w in ["km", "mapa", "distancia", "ruta"]):
-                    puntuacion += 3
-            
-            # Añadir peso por relevancia cuántica (QRNG)
-            numeros_cuanticos = self.bridge.conectar("genera 4 números aleatorios")
-            if numeros_cuanticos["resultado"].get("numeros"):
-                aleatorio = numeros_cuanticos["resultado"]["numeros"][0]["valor"] / 100
-                puntuacion += aleatorio
-            
-            r["puntuacion_cuántica"] = round(puntuacion, 2)
-        
-        # Ordenar por puntuación
-        resultados.sort(key=lambda x: x.get("puntuacion_cuántica", 0), reverse=True)
-        
-        return resultados[:max_resultados]
-    
-    # ================================================================
-    # 3. RECOMENDACIONES PERSONALIZADAS (QAOA + VQE)
-    # ================================================================
-    
-    def recomendar(self, query, resultados):
-        """
-        Genera recomendaciones personalizadas usando QAOA y VQE.
-        """
+    def recomendar(self, query: str, resultados: List[Dict], top_n: int = 5) -> Dict:
+        """Genera recomendaciones mejoradas."""
         print(f"📊 Generando recomendaciones para: '{query}'")
         
         if not resultados:
             return {"recomendaciones": [], "justificacion": "No hay resultados suficientes"}
         
-        # 1. QAOA: optimizar selección de mejores resultados
-        n = min(len(resultados), 10)
-        qaoa_result = self.bridge.conectar(
-            f"optimiza la selección de {n} opciones para {query}"
-        )
+        # Analizar intención
+        analisis = self.analizar_intencion(query)
         
-        # 2. VQE: calcular "energía" de cada recomendación (calidad)
-        for r in resultados[:n]:
-            texto = r.get("titulo", "") + " " + r.get("descripcion", "")
-            energia_res = self.bridge.conectar(f"simula la energía de {texto[:30]}")
-            r["calidad"] = energia_res["resultado"].get("energia", -1)
+        # Puntuación de resultados
+        for r in resultados:
+            r["puntuacion_final"] = self._calcular_puntuacion_final(r, analisis)
         
-        # 3. Ordenar por calidad
-        resultados.sort(key=lambda x: x.get("calidad", -1), reverse=True)
+        # Ordenar por puntuación
+        resultados.sort(key=lambda x: x.get("puntuacion_final", 0), reverse=True)
         
-        # 4. Generar justificación
-        justificacion = self._generar_justificacion(query, resultados[:5])
+        # Seleccionar top
+        top_resultados = resultados[:top_n]
+        
+        # Generar justificación
+        justificacion = self._generar_justificacion_detallada(query, top_resultados, analisis)
         
         return {
-            "recomendaciones": resultados[:5],
+            "recomendaciones": top_resultados,
             "justificacion": justificacion,
-            "metodos_usados": ["QAOA", "VQE", "Grover"]
+            "analisis": {
+                "intencion": analisis.intencion,
+                "palabras_clave": analisis.palabras_clave,
+                "entidades": analisis.entidades,
+                "prioridad": round(analisis.prioridad, 2)
+            }
         }
     
-    def _generar_justificacion(self, query, recomendaciones):
-        """
-        Genera una justificación en lenguaje natural para las recomendaciones.
-        """
-        if not recomendaciones:
-            return "No hay suficientes datos para generar recomendaciones."
+    def _calcular_puntuacion_final(self, resultado: Dict, analisis: QueryAnalysis) -> float:
+        """Calcula la puntuación final de un resultado."""
+        puntuacion = 0
         
-        justificacion = f"🔍 Basado en tu búsqueda '{query}', he seleccionado las mejores opciones usando:\n"
-        justificacion += "   • Grover: búsqueda eficiente\n"
-        justificacion += "   • VQE: análisis de calidad\n"
-        justificacion += "   • QAOA: optimización de selección\n"
-        justificacion += "   • QRNG: aleatoriedad controlada\n\n"
+        # 1. Relevancia base
+        relevancia = resultado.get("relevancia", 50) / 100
         
-        justificacion += "📌 Las recomendaciones están ordenadas por calidad:\n"
-        for i, r in enumerate(recomendaciones[:3], 1):
-            titulo = r.get("titulo", "Sin título")[:60]
-            calidad = r.get("calidad", 0)
-            justificacion += f"   {i}. {titulo} (calidad: {calidad:.4f})\n"
+        # 2. Coincidencia de palabras clave
+        texto = (resultado.get("titulo", "") + " " + resultado.get("descripcion", "")).lower()
+        coincidencias = sum(1 for p in analisis.palabras_clave if p in texto)
+        puntuacion_keywords = min(coincidencias / max(len(analisis.palabras_clave), 1), 1.0)
         
-        return justificacion
+        # 3. Entidades
+        entidades_match = sum(1 for e in analisis.entidades if e.lower() in texto)
+        puntuacion_entidades = min(entidades_match / max(len(analisis.entidades), 1), 1.0)
+        
+        # 4. Fuente confiable
+        url = resultado.get("url", "")
+        puntuacion_fuente = 0.5
+        fuentes_confiables = ["wikipedia", "google", "github", "stackoverflow", "medium", "arxiv", "nature"]
+        for f in fuentes_confiables:
+            if f in url:
+                puntuacion_fuente = 1.0
+                break
+        
+        # 5. Calidad de descripción
+        descripcion = resultado.get("descripcion", "")
+        puntuacion_calidad = min(len(descripcion) / 200, 1.0)
+        
+        # Ponderación
+        puntuacion = (
+            relevancia * 0.25 +
+            puntuacion_keywords * 0.30 +
+            puntuacion_entidades * 0.20 +
+            puntuacion_fuente * 0.15 +
+            puntuacion_calidad * 0.10
+        )
+        
+        return round(puntuacion * 100, 2)
     
-    # ================================================================
-    # 4. APRENDIZAJE CONTINUO
-    # ================================================================
+    def _generar_justificacion_detallada(self, query: str, resultados: List[Dict], analisis: QueryAnalysis) -> str:
+        """Genera una justificación detallada."""
+        partes = []
+        
+        # 1. Análisis de intención
+        partes.append(f"🎯 Analicé tu búsqueda '{query}' como: **{analisis.intencion}**")
+        
+        # 2. Palabras clave
+        if analisis.palabras_clave:
+            partes.append(f"🔑 Palabras clave: {', '.join(analisis.palabras_clave[:5])}")
+        
+        # 3. Entidades detectadas
+        if analisis.entidades:
+            partes.append(f"📌 Entidades: {', '.join(analisis.entidades)}")
+        
+        # 4. Prioridad
+        partes.append(f"📊 Prioridad: {analisis.prioridad:.0%}")
+        
+        # 5. Resultados seleccionados
+        partes.append("\n⭐ Las mejores opciones son:")
+        for i, r in enumerate(resultados[:3], 1):
+            titulo = r.get("titulo", "Sin título")[:50]
+            punt = r.get("puntuacion_final", 0)
+            partes.append(f"   {i}. {titulo} (puntuación: {punt:.1f}%)")
+        
+        # 6. Recomendación específica
+        if analisis.intencion == "compra":
+            partes.append("\n💰 Consejo: Revisa los precios en diferentes tiendas antes de comprar.")
+        elif analisis.intencion == "recomendacion":
+            partes.append("\n💡 Consejo: Considera las opiniones de otros usuarios.")
+        
+        return "\n".join(partes)
     
-    def aprender(self, query, resultado_seleccionado):
-        """
-        Aprende de las interacciones del usuario para mejorar.
-        """
+    def aprender(self, query: str, resultado_seleccionado: Dict, feedback: Optional[int] = None):
+        """Aprende de las interacciones del usuario."""
         print(f"🧠 Aprendiendo de: '{query}'")
         
-        # Actualizar perfil
+        # Actualizar estadísticas
         self.perfil_usuario["busquedas"] += 1
-        self.perfil_usuario["clics"] += 1
         
-        # Palabras clave
-        for palabra in query.split():
-            self.perfil_usuario["palabras_clave"][palabra.lower()] += 1
-        
-        # Categorías (detectar desde el resultado)
         if resultado_seleccionado:
+            self.perfil_usuario["clics"] += 1
             fuente = resultado_seleccionado.get("fuente", "desconocida")
             self.perfil_usuario["fuentes"][fuente] += 1
+        
+        if feedback is not None:
+            if feedback > 0:
+                self.perfil_usuario["feedback_positivo"] += 1
+            else:
+                self.perfil_usuario["feedback_negativo"] += 1
+        
+        # Actualizar palabras clave
+        analisis = self.analizar_intencion(query)
+        for palabra in analisis.palabras_clave:
+            self.perfil_usuario["palabras_clave"][palabra] += 1
+        
+        for entidad in analisis.entidades:
+            self.perfil_usuario["entidades"][entidad] += 1
+        
+        self.perfil_usuario["categorias"][analisis.intencion] += 1
+        self.perfil_usuario["ultima_actividad"] = datetime.now().isoformat()
         
         # Guardar historial
         self.historial_usuario.append({
             "fecha": datetime.now().isoformat(),
             "query": query,
+            "intencion": analisis.intencion,
             "resultado": resultado_seleccionado,
-            "accion": "clic"
+            "accion": "clic" if resultado_seleccionado else "busqueda",
+            "feedback": feedback
         })
         
         # Guardar perfil
         self._guardar_perfil()
     
     def _guardar_perfil(self):
-        """Guarda el perfil del usuario en un archivo."""
+        """Guarda el perfil del usuario."""
         try:
             with open("perfil_usuario.json", "w", encoding="utf-8") as f:
                 json.dump({
-                    "perfil": dict(self.perfil_usuario),
-                    "historial": self.historial_usuario[-50:]
+                    "perfil": {
+                        k: dict(v) if isinstance(v, defaultdict) else v 
+                        for k, v in self.perfil_usuario.items()
+                    },
+                    "historial": self.historial_usuario[-100:]
                 }, f, indent=2, ensure_ascii=False)
-        except:
-            pass
-    
-    def cargar_perfil(self):
-        """Carga el perfil del usuario desde archivo."""
-        try:
-            with open("perfil_usuario.json", "r", encoding="utf-8") as f:
-                data = json.load(f)
-                self.perfil_usuario.update(data.get("perfil", {}))
-                self.historial_usuario = data.get("historial", [])
-        except:
-            pass
-    
-    # ================================================================
-    # 5. BÚSQUEDA INTELIGENTE COMPLETA
-    # ================================================================
-    
-    def buscar_inteligente(self, query):
-        """
-        Búsqueda completa e inteligente con todos los algoritmos.
-        """
-        print("\n" + "="*70)
-        print("🧠 BUSCADOR INTELIGENTE")
-        print("="*70)
-        print(f"📝 Consulta: '{query}'")
-        print("-"*50)
-        
-        # 1. Analizar intención
-        intencion = self.analizar_intencion(query)
-        print(f"🎯 Intención: {intencion['intencion']}")
-        print(f"🔐 Patrón: {intencion['patron']}")
-        print(f"📊 Prioridad: {intencion['prioridad']:.2f}")
-        
-        # 2. Buscar optimizado
-        resultados = self.buscar_optimizado(query, intencion)
-        print(f"🔍 Resultados encontrados: {len(resultados)}")
-        
-        # 3. Generar recomendaciones
-        recomendacion = self.recomendar(query, resultados)
-        print(f"📊 Recomendaciones generadas: {len(recomendacion['recomendaciones'])}")
-        
-        # 4. Retornar resultado completo
-        return {
-            "query": query,
-            "intencion": intencion,
-            "resultados": resultados,
-            "recomendaciones": recomendacion,
-            "metodos_usados": ["Bernstein-Vazirani", "VQE", "Grover", "QAOA", "QRNG"]
-        }
-    
-    def mostrar_resultados_inteligentes(self, resultado):
-        """
-        Muestra los resultados de búsqueda inteligente.
-        """
-        print("\n" + "="*70)
-        print("📊 RESULTADOS INTELIGENTES")
-        print("="*70)
-        print(f"🔍 Consulta: {resultado['query']}")
-        print(f"🎯 Intención detectada: {resultado['intencion']['intencion']}")
-        print(f"🧠 Métodos usados: {', '.join(resultado['metodos_usados'])}")
-        print("-"*50)
-        
-        # Recomendaciones
-        print("\n⭐ RECOMENDACIONES:")
-        for i, r in enumerate(resultado['recomendaciones']['recomendaciones'][:5], 1):
-            titulo = r.get('titulo', 'Sin título')
-            calidad = r.get('calidad', 0)
-            puntuacion = r.get('puntuacion_cuántica', 0)
-            print(f"{i}. {titulo}")
-            print(f"   📊 Calidad: {calidad:.4f} | Puntuación: {puntuacion}")
-            print(f"   🔗 {r.get('url', '#')}")
-        
-        print("\n💡 JUSTIFICACIÓN:")
-        print(resultado['recomendaciones']['justificacion'])
-        
-        print("\n" + "="*70)
-
-
-# ============================================================
-# PRUEBA
-# ============================================================
-
-if __name__ == "__main__":
-    buscador = IntelligentSearch()
-    buscador.cargar_perfil()
-    
-    print("="*70)
-    print("🧠 BUSCADOR INTELIGENTE - PRUEBA")
-    print("="*70)
-    
-    consultas = [
-        "mejor laptop para programar",
-        "precio de zapatillas adidas",
-        "como llegar al centro",
-        "quantum computing tutorial",
-        "restaurantes cerca de mi"
-    ]
-    
-    for query in consultas:
-        resultado = buscador.buscar_inteligente(query)
-        buscador.mostrar_resultados_inteligentes(resultado)
+        except Exception as e:
+            print(f"⚠️ Error guardando perfil: {e}")

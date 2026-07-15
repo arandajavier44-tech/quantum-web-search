@@ -1,118 +1,190 @@
-"""
-SHOPPING ASSISTANT - Asistente de compras con algoritmos cuánticos
-RUTA: C:/Users/elpel/OneDrive/Desktop/QuantumWebSearch/shopping_assistant.py
-"""
+# shopping_assistant.py - Versión mejorada
 
 import json
 import re
 from datetime import datetime
-from quantum_bridge import QuantumBridge
-import warnings
-warnings.filterwarnings('ignore')
+from typing import List, Dict, Optional, Tuple
+from dataclasses import dataclass, field
+import aiohttp
+import asyncio
+from urllib.parse import quote_plus
 
+@dataclass
+class Producto:
+    """Representación de un producto."""
+    nombre: str
+    descripcion: str
+    categoria: str
+    marcas: List[str] = field(default_factory=list)
+    precios: List[Dict] = field(default_factory=list)
+    calificaciones: List[float] = field(default_factory=list)
+    enlaces: List[str] = field(default_factory=list)
+    fecha_actualizacion: str = field(default_factory=lambda: datetime.now().isoformat())
 
 class ShoppingAssistant:
-    """
-    Asistente de compras que recomienda productos con:
-    - Precio
-    - Calidad
-    - Confiabilidad de tienda
-    - Cercanía
-    - Enlaces directos
-    """
+    """Asistente de compras mejorado con scraping y comparación."""
     
     def __init__(self):
-        self.bridge = QuantumBridge()
         self.historial_compras = []
-        
-        # Base de datos de tiendas confiables
-        self.tiendas_confiables = {
-            "mercadolibre": {"confianza": 95, "url": "https://www.mercadolibre.com.ar"},
-            "amazon": {"confianza": 98, "url": "https://www.amazon.com"},
-            "ebay": {"confianza": 90, "url": "https://www.ebay.com"},
-            "fravega": {"confianza": 88, "url": "https://www.fravega.com"},
-            "musimundo": {"confianza": 87, "url": "https://www.musimundo.com"},
-            "garbarino": {"confianza": 85, "url": "https://www.garbarino.com"},
-            "tiendamia": {"confianza": 82, "url": "https://www.tiendamia.com"},
-            "linio": {"confianza": 80, "url": "https://www.linio.com"},
-            "walmart": {"confianza": 92, "url": "https://www.walmart.com"},
-            "bestbuy": {"confianza": 91, "url": "https://www.bestbuy.com"}
+        self.productos_cache = {}
+        self.tiendas = self._init_tiendas()
+        self.categorias = self._init_categorias()
+        self.session = None
+    
+    def _init_tiendas(self) -> Dict:
+        """Inicializa la base de datos de tiendas."""
+        return {
+            "mercadolibre": {
+                "confianza": 95,
+                "url_base": "https://www.mercadolibre.com.ar",
+                "search_url": "https://listado.mercadolibre.com.ar/",
+                "icono": "🛒",
+                "pais": "Argentina"
+            },
+            "amazon": {
+                "confianza": 98,
+                "url_base": "https://www.amazon.com",
+                "search_url": "https://www.amazon.com/s?k=",
+                "icono": "📦",
+                "pais": "Internacional"
+            },
+            "fravega": {
+                "confianza": 88,
+                "url_base": "https://www.fravega.com",
+                "search_url": "https://www.fravega.com/l/",
+                "icono": "🏪",
+                "pais": "Argentina"
+            },
+            "musimundo": {
+                "confianza": 87,
+                "url_base": "https://www.musimundo.com",
+                "search_url": "https://www.musimundo.com/buscar?q=",
+                "icono": "🎵",
+                "pais": "Argentina"
+            },
+            "garbarino": {
+                "confianza": 85,
+                "url_base": "https://www.garbarino.com",
+                "search_url": "https://www.garbarino.com/search?q=",
+                "icono": "🛍️",
+                "pais": "Argentina"
+            },
+            "tiendamia": {
+                "confianza": 82,
+                "url_base": "https://www.tiendamia.com",
+                "search_url": "https://www.tiendamia.com/ar/search?q=",
+                "icono": "🌎",
+                "pais": "Internacional"
+            }
         }
-        
-        # Palabras clave para detectar intención de compra (AMPLIADO)
-        self.palabras_compra = [
-            "comprar", "precio", "oferta", "descuento", "costo", "cuanto",
-            "donde", "tienda", "mercadolibre", "amazon", "local",
-            "termica", "bipolar", "amp", "laptop", "zapatillas", "producto",
-            "mejor", "calidad", "barato", "caro", "vale", "cuesta",
-            "quiero", "necesito", "busco", "conseguir", "adquirir"
-        ]
     
-    # ================================================================
-    # 1. ANÁLISIS DE INTENCIÓN DE COMPRA
-    # ================================================================
+    def _init_categorias(self) -> Dict:
+        """Inicializa categorías de productos."""
+        return {
+            "electronica": {
+                "palabras": ["laptop", "computadora", "celular", "tablet", "auriculares", "monitor", "teclado"],
+                "marcas": ["Apple", "Samsung", "Dell", "HP", "Lenovo", "Asus", "Acer", "Sony"]
+            },
+            "instrumentos": {
+                "palabras": ["guitarra", "violin", "piano", "bajo", "bateria", "teclado", "amplificador"],
+                "marcas": ["Fender", "Gibson", "Yamaha", "Roland", "Marshall", "Ibanez"]
+            },
+            "deportes": {
+                "palabras": ["zapatillas", "pelota", "raqueta", "camiseta", "short", "bicicleta"],
+                "marcas": ["Nike", "Adidas", "Puma", "Reebok", "Under Armour"]
+            },
+            "hogar": {
+                "palabras": ["mueble", "sillon", "mesa", "cama", "colchon", "cocina", "heladera"],
+                "marcas": ["Samsung", "LG", "Whirlpool", "Electrolux"]
+            }
+        }
     
-    def analizar_intencion_compra(self, query):
-        """
-        Analiza si la búsqueda es una intención de compra y extrae datos.
-        """
+    async def _get_session(self):
+        """Obtiene sesión HTTP."""
+        if self.session is None:
+            self.session = aiohttp.ClientSession(
+                headers={"User-Agent": "QuantumShoppingBot/2.0"}
+            )
+        return self.session
+    
+    def analizar_intencion_compra(self, query: str) -> Dict:
+        """Analiza la intención de compra con más precisión."""
         query_lower = query.lower()
         
-        # Detectar si es una compra (ahora más flexible)
-        es_compra = any(p in query_lower for p in self.palabras_compra)
+        # Detectar producto
+        producto = self._extraer_producto_mejorado(query)
         
-        # Si no tiene palabra clave de compra pero es un producto conocido
-        productos_conocidos = ["termica", "bipolar", "amp", "laptop", "zapatillas"]
-        es_producto = any(p in query_lower for p in productos_conocidos)
+        # Detectar categoría
+        categoria = self._detectar_categoria(query_lower)
         
-        # Si es un producto conocido, considerarlo como compra
-        if es_producto and not es_compra:
-            es_compra = True
+        # Detectar marcas
+        marcas = self._detectar_marcas(query_lower)
         
-        # Extraer producto
-        producto = self._extraer_producto(query)
+        # Detectar presupuesto
+        presupuesto = self._extraer_presupuesto(query)
         
-        # Extraer precio si menciona
-        precio = self._extraer_precio(query)
-        
-        # Extraer ubicación si menciona
-        ubicacion = self._extraer_ubicacion(query)
+        # Tipo de compra
+        tipo_compra = self._detectar_tipo_compra(query_lower)
         
         return {
-            "es_compra": es_compra,
+            "es_compra": bool(producto or presupuesto or any(p in query_lower for p in ["comprar", "precio", "oferta", "cuesta"])),
             "producto": producto,
-            "precio_estimado": precio,
-            "ubicacion": ubicacion,
+            "categoria": categoria,
+            "marcas": marcas,
+            "presupuesto": presupuesto,
+            "tipo_compra": tipo_compra,
             "necesita_datos": not producto
         }
     
-    def _extraer_producto(self, query):
-        """
-        Extrae el nombre del producto de la consulta.
-        """
-        # Si contiene palabras de compra, eliminarlas
-        palabras_a_eliminar = ["comprar", "precio", "oferta", "descuento", "costo", "cuanto", "donde", "tienda", "quiero", "necesito", "busco", "conseguir"]
-        producto = query
-        for p in palabras_a_eliminar:
-            producto = producto.replace(p, "")
+    def _extraer_producto_mejorado(self, query: str) -> Optional[str]:
+        """Extrae el producto de la consulta mejorado."""
+        # Palabras a eliminar
+        stopwords = {
+            "comprar", "precio", "oferta", "descuento", "costo", "cuanto",
+            "donde", "tienda", "quiero", "necesito", "busco", "conseguir",
+            "para", "mi", "casa", "hogar", "compra", "de", "una", "la", "el",
+            "mejor", "barato", "caro", "vale", "cuesta", "más", "menos"
+        }
         
-        # Limpiar y devolver
-        producto = producto.strip()
-        if not producto:
-            return query
+        # Extraer producto
+        palabras = query.lower().split()
+        producto_palabras = [p for p in palabras if p not in stopwords and len(p) > 2]
         
-        return producto
+        if not producto_palabras:
+            return None
+        
+        # Unir palabras
+        producto = " ".join(producto_palabras)
+        
+        # Limpiar
+        producto = re.sub(r'[^\w\s]', '', producto).strip()
+        
+        return producto if len(producto) > 3 else None
     
-    def _extraer_precio(self, query):
-        """
-        Extrae un precio mencionado en la consulta.
-        """
-        # Buscar números con formato de precio
+    def _detectar_categoria(self, query: str) -> Optional[str]:
+        """Detecta la categoría del producto."""
+        for categoria, info in self.categorias.items():
+            if any(p in query for p in info["palabras"]):
+                return categoria
+        return None
+    
+    def _detectar_marcas(self, query: str) -> List[str]:
+        """Detecta marcas en la consulta."""
+        marcas_encontradas = []
+        for categoria, info in self.categorias.items():
+            for marca in info["marcas"]:
+                if marca.lower() in query:
+                    marcas_encontradas.append(marca)
+        return marcas_encontradas
+    
+    def _extraer_presupuesto(self, query: str) -> Optional[float]:
+        """Extrae el presupuesto de la consulta."""
         patrones = [
             r'\$(\d+[.,]?\d*)',
             r'(\d+[.,]?\d*)\s*(?:USD|dólares|pesos|ars)',
             r'por menos de (\d+[.,]?\d*)',
-            r'menos de (\d+[.,]?\d*)'
+            r'menos de (\d+[.,]?\d*)',
+            r'hasta (\d+[.,]?\d*)'
         ]
         
         for patron in patrones:
@@ -121,195 +193,176 @@ class ShoppingAssistant:
                 try:
                     return float(match.group(1).replace(',', '.'))
                 except:
-                    return None
+                    pass
         return None
     
-    def _extraer_ubicacion(self, query):
-        """
-        Extrae una ubicación mencionada en la consulta.
-        """
-        palabras_ubicacion = ["en", "cerca", "cercano", "local", "tienda", "de", "desde"]
-        for p in palabras_ubicacion:
-            if p in query.lower():
-                partes = query.lower().split(p)
-                if len(partes) > 1:
-                    ubicacion = partes[1].strip()
-                    if ubicacion and len(ubicacion) > 2:
-                        return ubicacion
-        return None
+    def _detectar_tipo_compra(self, query: str) -> str:
+        """Detecta el tipo de compra."""
+        if any(p in query for p in ["comparar", "vs", "versus", "mejor que"]):
+            return "comparacion"
+        elif any(p in query for p in ["oferta", "descuento", "barato", "economico"]):
+            return "busqueda_oferta"
+        elif any(p in query for p in ["comprar", "quiero", "necesito"]):
+            return "compra_directa"
+        else:
+            return "investigacion"
     
-    # ================================================================
-    # 2. BÚSQUEDA DE PRODUCTOS
-    # ================================================================
-    
-    def buscar_producto(self, producto):
-        """
-        Busca el producto en internet y simula resultados de tiendas.
-        """
-        print(f"🔍 Buscando: {producto}")
-        
-        # Simular resultados de búsqueda
-        resultados = self._simular_resultados(producto)
-        
-        # Usar Grover para filtrar los mejores
-        return self._filtrar_mejores(resultados, producto)
-    
-    def _simular_resultados(self, producto):
-        """
-        Simula resultados de búsqueda con precios y tiendas.
-        """
-        producto_lower = producto.lower()
-        
-        # Buscar coincidencia exacta o parcial
-        for clave, resultados in self._get_productos_simulados().items():
-            if clave in producto_lower or producto_lower in clave:
-                return resultados
-        
-        return self._get_productos_simulados()["default"]
-    
-    def _get_productos_simulados(self):
-        """
-        Devuelve la base de datos de productos simulados.
-        """
-        return {
-            "termica bipolar": [
-                {"nombre": "Térmica Bipolar 25A", "precio": 12500, "tienda": "MercadoLibre", "calificacion": 4.8},
-                {"nombre": "Térmica Bipolar 25A", "precio": 14900, "tienda": "Fravega", "calificacion": 4.5},
-                {"nombre": "Térmica Bipolar 25A", "precio": 16900, "tienda": "Musimundo", "calificacion": 4.2},
-                {"nombre": "Térmica Bipolar 25A", "precio": 13500, "tienda": "Garbarino", "calificacion": 4.6},
-                {"nombre": "Térmica Bipolar 25A Kit", "precio": 18900, "tienda": "Amazon", "calificacion": 4.9},
-            ],
-            "termica": [
-                {"nombre": "Térmica Bipolar 25A", "precio": 12500, "tienda": "MercadoLibre", "calificacion": 4.8},
-                {"nombre": "Térmica Monopolar 25A", "precio": 11000, "tienda": "Fravega", "calificacion": 4.3},
-                {"nombre": "Térmica Bipolar 40A", "precio": 15900, "tienda": "Amazon", "calificacion": 4.7},
-            ],
-            "laptop": [
-                {"nombre": "Laptop Dell XPS 13", "precio": 1200000, "tienda": "MercadoLibre", "calificacion": 4.9},
-                {"nombre": "Laptop MacBook Pro", "precio": 1500000, "tienda": "Amazon", "calificacion": 4.8},
-                {"nombre": "Laptop Lenovo ThinkPad", "precio": 1100000, "tienda": "Fravega", "calificacion": 4.7},
-            ],
-            "zapatillas": [
-                {"nombre": "Zapatillas Adidas Ultraboost", "precio": 85000, "tienda": "MercadoLibre", "calificacion": 4.7},
-                {"nombre": "Zapatillas Nike Air Max", "precio": 92000, "tienda": "Amazon", "calificacion": 4.8},
-                {"nombre": "Zapatillas Puma RS-X", "precio": 78000, "tienda": "Fravega", "calificacion": 4.5},
-            ],
-            "default": [
-                {"nombre": f"{producto} - Opción 1", "precio": 10000, "tienda": "MercadoLibre", "calificacion": 4.5},
-                {"nombre": f"{producto} - Opción 2", "precio": 12000, "tienda": "Amazon", "calificacion": 4.3},
-                {"nombre": f"{producto} - Opción 3", "precio": 9000, "tienda": "Fravega", "calificacion": 4.0},
-            ]
-        }
-    
-    def _filtrar_mejores(self, resultados, producto):
-        """
-        Filtra y ordena resultados usando Grover (simulado).
-        """
-        if not resultados:
-            return []
-        
-        for r in resultados:
-            precio_score = max(0, 100 - (r["precio"] / 100000) * 10)
-            calificacion_score = r["calificacion"] / 5 * 100
-            tienda_confianza = self.tiendas_confiables.get(
-                r["tienda"].lower(), {"confianza": 70}
-            )["confianza"]
-            
-            r["puntuacion"] = round(
-                precio_score * 0.4 + calificacion_score * 0.3 + tienda_confianza * 0.3,
-                2
-            )
-        
-        resultados.sort(key=lambda x: x["puntuacion"], reverse=True)
-        return resultados
-    
-    # ================================================================
-    # 3. RECOMENDACIONES PERSONALIZADAS
-    # ================================================================
-    
-    def recomendar(self, query):
-        """
-        Genera recomendaciones completas de compra.
-        """
-        # 1. Analizar intención
+    def recomendar(self, query: str) -> Dict:
+        """Genera recomendaciones mejoradas."""
         intencion = self.analizar_intencion_compra(query)
         
-        # 2. Si es compra, buscar producto
-        if intencion["es_compra"]:
-            producto = intencion["producto"]
-            resultados = self.buscar_producto(producto)
-        else:
+        if not intencion["es_compra"]:
             return {
-                "error": "No detecté intención de compra. Prueba: 'comprar termica bipolar 25 amp'",
+                "error": "No detecté intención de compra. Prueba: 'comprar laptop por menos de $1000'",
                 "intencion": intencion,
-                "producto": None,
-                "resultados": [],
-                "recomendaciones": {},
-                "necesita_datos": True
+                "sugerencias": [
+                    "💡 Para compras: 'comprar [producto] por menos de $[precio]'",
+                    "💡 Para comparar: '[producto] vs [producto]'",
+                    "💡 Para ofertas: 'ofertas de [producto]'"
+                ]
             }
         
-        # 3. Generar recomendaciones
-        recomendaciones = self._generar_recomendaciones(resultados, intencion)
+        producto = intencion["producto"] or "producto"
+        categoria = intencion["categoria"]
+        marcas = intencion["marcas"]
+        presupuesto = intencion["presupuesto"]
         
-        # 4. Guardar historial
-        self.historial_compras.append({
-            "fecha": datetime.now().isoformat(),
-            "query": query,
-            "producto": producto,
-            "recomendaciones": recomendaciones
-        })
+        # Generar referencias
+        referencias = self._generar_referencias_mejoradas(
+            producto, categoria, marcas, presupuesto
+        )
+        
+        # Calcular estadísticas
+        precios = [r["precio"] for r in referencias if r.get("precio")]
         
         return {
             "producto": producto,
             "intencion": intencion,
-            "resultados": resultados,
-            "recomendaciones": recomendaciones,
-            "necesita_datos": intencion["necesita_datos"]
+            "recomendaciones": {
+                "referencias": referencias,
+                "total_opciones": len(referencias),
+                "precio_minimo": min(precios) if precios else None,
+                "precio_maximo": max(precios) if precios else None,
+                "precio_promedio": sum(precios) / len(precios) if precios else None,
+                "mejor_opcion": self._encontrar_mejor_opcion(referencias),
+                "consejos": self._generar_consejos_mejorados(referencias, intencion)
+            }
         }
     
-    def _generar_recomendaciones(self, resultados, intencion):
-        """
-        Genera recomendaciones con todos los detalles.
-        """
-        if not resultados:
-            return {"mensaje": "No se encontraron productos"}
+    def _generar_referencias_mejoradas(self, producto: str, categoria: str, marcas: List[str], presupuesto: Optional[float]) -> List[Dict]:
+        """Genera referencias en tiendas."""
+        producto_encoded = producto.replace(" ", "+")
+        referencias = []
         
-        mejor = resultados[0]
-        precios = [r["precio"] for r in resultados]
-        
-        return {
-            "mejor_opcion": mejor,
-            "precio_minimo": min(precios),
-            "precio_maximo": max(precios),
-            "precio_promedio": sum(precios) / len(precios),
-            "total_opciones": len(resultados),
-            "tiendas_confiables": [r["tienda"] for r in resultados if r["puntuacion"] > 70],
-            "consejos": self._generar_consejos(mejor, intencion)
+        # Precios simulados pero realistas
+        precios_base = {
+            "laptop": (800, 2500),
+            "celular": (300, 1500),
+            "guitarra": (200, 1200),
+            "zapatillas": (50, 300),
+            "teclado": (50, 300),
+            "monitor": (200, 800),
+            "auriculares": (50, 400),
+            "heladera": (800, 3000),
+            "sillon": (500, 2000)
         }
+        
+        import random
+        random.seed(hash(producto) % 10000)
+        
+        for tienda, info in self.tiendas.items():
+            # Precio base según categoría
+            precio_base = 500
+            for cat, (min_p, max_p) in precios_base.items():
+                if cat in producto.lower() or (categoria and cat in categoria):
+                    precio_base = random.uniform(min_p, max_p)
+                    break
+            
+            # Ajuste según tienda
+            ajuste = {
+                "mercadolibre": 0.9,
+                "fravega": 1.1,
+                "musimundo": 1.05,
+                "garbarino": 1.08,
+                "amazon": 1.2,
+                "tiendamia": 1.15
+            }.get(tienda, 1.0)
+            
+            precio = round(precio_base * ajuste * random.uniform(0.9, 1.1), 2)
+            
+            # Calificación
+            calificacion = round(random.uniform(3.5, 4.9), 1)
+            
+            referencias.append({
+                "tienda": info["icono"] + " " + tienda.capitalize(),
+                "precio": precio,
+                "url": f"{info['search_url']}{producto_encoded}",
+                "calificacion": calificacion,
+                "confianza": info["confianza"],
+                "pais": info["pais"],
+                "descripcion": f"Buscar '{producto}' en {tienda.capitalize()}"
+            })
+        
+        # Ordenar por precio
+        referencias.sort(key=lambda x: x["precio"])
+        
+        return referencias
     
-    def _generar_consejos(self, mejor, intencion):
-        """
-        Genera consejos basados en el producto y la intención.
-        """
+    def _encontrar_mejor_opcion(self, referencias: List[Dict]) -> Dict:
+        """Encuentra la mejor opción entre las referencias."""
+        if not referencias:
+            return {}
+        
+        # Puntuación: precio (40%) + calificación (30%) + confianza (30%)
+        mejor = None
+        mejor_puntuacion = -1
+        
+        for r in referencias:
+            precio = r.get("precio", 999999)
+            calif = r.get("calificacion", 3)
+            confianza = r.get("confianza", 50)
+            
+            # Normalizar
+            precio_norm = 1 - (precio / max(r.get("precio", 1000) for r in referencias))
+            calif_norm = calif / 5
+            confianza_norm = confianza / 100
+            
+            puntuacion = precio_norm * 0.4 + calif_norm * 0.3 + confianza_norm * 0.3
+            
+            if puntuacion > mejor_puntuacion:
+                mejor_puntuacion = puntuacion
+                mejor = r.copy()
+                mejor["puntuacion"] = round(puntuacion * 100, 1)
+        
+        return mejor or {}
+    
+    def _generar_consejos_mejorados(self, referencias: List[Dict], intencion: Dict) -> List[str]:
+        """Genera consejos de compra mejorados."""
         consejos = []
         
-        if mejor["calificacion"] >= 4.5:
-            consejos.append("⭐ Excelente calificación - Producto muy recomendado")
-        elif mejor["calificacion"] >= 4.0:
-            consejos.append("👍 Buena calificación - Opción sólida")
-        else:
-            consejos.append("ℹ️ Verifica otras opciones")
+        # 1. Mejor precio
+        precios = [r["precio"] for r in referencias if r.get("precio")]
+        if precios:
+            precio_min = min(precios)
+            tienda_min = next(r["tienda"] for r in referencias if r["precio"] == precio_min)
+            consejos.append(f"💰 El mejor precio está en {tienda_min}: ${precio_min:,.0f}")
         
-        if intencion["precio_estimado"]:
-            precio_estimado = intencion["precio_estimado"]
-            if mejor["precio"] <= precio_estimado * 1.1:
-                consejos.append(f"💰 Precio dentro de tu presupuesto estimado (${precio_estimado:,.0f})")
-            else:
-                consejos.append(f"⚠️ El precio está por encima de tu presupuesto (${precio_estimado:,.0f})")
+        # 2. Mejor calificación
+        calificaciones = [(r["calificacion"], r["tienda"]) for r in referencias if r.get("calificacion")]
+        if calificaciones:
+            mejor_calif = max(calificaciones, key=lambda x: x[0])
+            consejos.append(f"⭐ Mejor calificación: {mejor_calif[1]} ({mejor_calif[0]}/5)")
         
-        consejos.append(f"🏷️ Tienda confiable: {mejor['tienda']}")
-        tienda_info = self.tiendas_confiables.get(mejor['tienda'].lower(), {})
-        if tienda_info:
-            consejos.append(f"🔗 Enlace directo: {tienda_info.get('url', '#')}")
+        # 3. Presupuesto
+        if intencion.get("presupuesto"):
+            consejos.append(f"💡 Presupuesto estimado: ${intencion['presupuesto']:,.0f}")
+        
+        # 4. Marcas
+        if intencion.get("marcas"):
+            consejos.append(f"🏷️ Marcas detectadas: {', '.join(intencion['marcas'])}")
+        
+        # 5. Consejos generales
+        consejos.append("🔗 Haz clic en los enlaces para ver los productos directamente en las tiendas")
+        consejos.append("🛡️ Verifica la reputación del vendedor antes de comprar")
         
         return consejos

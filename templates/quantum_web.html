@@ -275,7 +275,85 @@
         .modal-close { float: right; opacity: 0.6; cursor: pointer; font-size: 24px; line-height: 1; transition: opacity 0.2s ease; }
         .modal-close:hover { opacity: 1; }
 
-        @media (max-width: 600px) { body { padding: 10px; } .search-box { flex-direction: column; } .search-box button { width: 100%; justify-content: center; } .header h1 { font-size: 22px; } .header-top { flex-direction: column; align-items: center; } .stats-bar { flex-direction: column; } .resultado-container .grid-2 { grid-template-columns: 1fr 1fr; } .resultado-container .precios-grid { grid-template-columns: 1fr 1fr; } .historial-item { flex-wrap: wrap; gap: 4px; } .pagination-controls { justify-content: center; } .resultado-container .ref-item { flex-direction: column; align-items: stretch; text-align: center; } }
+        /* Toast notifications */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            animation: slideInRight 0.4s ease-out;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        .toast-info { background: rgba(6,182,212,0.95); }
+        .toast-success { background: rgba(34,197,94,0.95); }
+        .toast-warning { background: rgba(245,158,11,0.95); }
+        .toast-error { background: rgba(239,68,68,0.95); }
+        .toast-hidden { opacity: 0; transform: translateX(50px); }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Botón de voz */
+        .voice-btn {
+            padding: 14px 18px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        .voice-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+        }
+        .voice-btn.listening {
+            animation: pulse 1s ease-in-out infinite;
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .search-box { flex-direction: column; }
+            .search-box button { width: 100%; justify-content: center; }
+            .header h1 { font-size: 22px; }
+            .header-top { flex-direction: column; align-items: center; }
+            .stats-bar { flex-direction: column; }
+            .resultado-container .grid-2 { grid-template-columns: 1fr; }
+            .resultado-container .precios-grid { grid-template-columns: 1fr 1fr; }
+            .historial-item { flex-wrap: wrap; gap: 4px; }
+            .pagination-controls { justify-content: center; }
+            .resultado-container .ref-item { flex-direction: column; align-items: stretch; text-align: center; }
+            .header-actions button { font-size: 11px; padding: 4px 10px; }
+            .badges .badge { font-size: 9px; padding: 1px 10px; }
+            .modal-content { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -323,6 +401,7 @@
     <div class="search-box">
         <input type="text" id="searchInput" placeholder="Escribe lo que necesites... (compras, números, preguntas, etc.)" autofocus>
         <button class="btn-unificado" id="unificadoBtn">🚀 Buscar</button>
+        <button class="voice-btn" id="voiceBtn" title="Buscar por voz">🎤</button>
     </div>
 
     <!-- ============================================================
@@ -384,6 +463,11 @@
 </div>
 
 <!-- ============================================================
+TOAST CONTAINER
+============================================================ -->
+<div id="toastContainer"></div>
+
+<!-- ============================================================
 MODAL DE AUTENTICACIÓN
 ============================================================ -->
 <div class="modal" id="authModal">
@@ -419,12 +503,15 @@ let modoActual = 'unificado';
 let authMode = 'login';
 let socket = null;
 let timeoutId = null;
+let recognition = null;
+let isListening = false;
 
 // ============================================================
 // ELEMENTOS DOM
 // ============================================================
 const searchInput = document.getElementById('searchInput');
 const unificadoBtn = document.getElementById('unificadoBtn');
+const voiceBtn = document.getElementById('voiceBtn');
 const resultsDiv = document.getElementById('results');
 const statsBar = document.getElementById('statsBar');
 const cacheInfo = document.getElementById('cacheInfo');
@@ -435,6 +522,22 @@ const dashboardSection = document.getElementById('dashboardSection');
 const wsStatus = document.getElementById('wsStatus');
 
 // ============================================================
+// TOAST NOTIFICATIONS
+// ============================================================
+function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('toast-hidden');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ============================================================
 // MODO OSCURO/CLARO
 // ============================================================
 function toggleModo() {
@@ -443,10 +546,12 @@ function toggleModo() {
         body.classList.remove('dark-mode');
         body.classList.add('light-mode');
         localStorage.setItem('modo', 'light');
+        showToast('🌞 Modo claro activado', 'info');
     } else {
         body.classList.remove('light-mode');
         body.classList.add('dark-mode');
         localStorage.setItem('modo', 'dark');
+        showToast('🌙 Modo oscuro activado', 'info');
     }
 }
 
@@ -454,6 +559,94 @@ document.addEventListener('DOMContentLoaded', () => {
     const modo = localStorage.getItem('modo') || 'dark';
     document.body.classList.add(modo === 'dark' ? 'dark-mode' : 'light-mode');
 });
+
+// ============================================================
+// RECONOCIMIENTO DE VOZ
+// ============================================================
+function initVoiceSearch() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        voiceBtn.style.display = 'none';
+        return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    
+    recognition.onstart = function() {
+        isListening = true;
+        voiceBtn.classList.add('listening');
+        voiceBtn.textContent = '🔴';
+        showToast('🎤 Escuchando...', 'info');
+    };
+    
+    recognition.onend = function() {
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.textContent = '🎤';
+    };
+    
+    recognition.onresult = function(event) {
+        let transcript = '';
+        let isFinal = false;
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                isFinal = true;
+            }
+        }
+        
+        if (isFinal) {
+            searchInput.value = transcript;
+            showToast(`🎤 Búsqueda por voz: "${transcript}"`, 'success');
+            buscarUnificado();
+        } else {
+            searchInput.value = transcript;
+        }
+    };
+    
+    recognition.onerror = function(event) {
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        voiceBtn.textContent = '🎤';
+        if (event.error !== 'aborted' && event.error !== 'no-speech') {
+            showToast('🎤 Error: ' + event.error, 'error');
+        }
+    };
+}
+
+voiceBtn.addEventListener('click', function() {
+    if (!recognition) {
+        showToast('🎤 Reconocimiento de voz no disponible', 'error');
+        return;
+    }
+    
+    if (isListening) {
+        recognition.abort();
+        return;
+    }
+    
+    try {
+        recognition.start();
+    } catch (e) {
+        // Ya está iniciado
+    }
+});
+
+// ============================================================
+// TEXTO A VOZ
+// ============================================================
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSpeechUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+}
 
 // ============================================================
 // WEBSOCKET
@@ -541,6 +734,7 @@ async function buscarUnificado() {
         if (data.error) {
             resultsDiv.innerHTML = `<div class="error">❌ ${data.error}</div>`;
             cacheInfo.textContent = '⚠️ Error en la búsqueda';
+            showToast('Error: ' + data.error, 'error');
             return;
         }
 
@@ -565,7 +759,7 @@ async function buscarUnificado() {
         `;
 
         // ============================================================
-        // COMPRAS - Con referencias y enlaces (CORREGIDO)
+        // COMPRAS - Con referencias y enlaces
         // ============================================================
         const rec = resultado.recomendacion || resultado.recomendaciones || {};
         if (rec.referencias && rec.referencias.length > 0) {
@@ -758,16 +952,20 @@ async function buscarUnificado() {
             <div class="stats-bar">
                 <div class="stat">🚀 <strong>Unificado</strong></div>
                 <div class="stat">🧠 <strong>${algoritmo.toUpperCase()}</strong></div>
+                <div class="stat">⏱️ <strong>${data.tiempo ? data.tiempo.toFixed(2) : '0.00'}s</strong></div>
             </div>
         `;
 
         cacheInfo.textContent = `🚀 Búsqueda completada con ${algoritmo.toUpperCase()}`;
         cargarHistorial();
         cargarDashboard();
+        
+        showToast(`✅ Búsqueda completada con ${algoritmo.toUpperCase()}`, 'success');
 
     } catch (e) {
         resultsDiv.innerHTML = `<div class="error">❌ Error: ${e.message}</div>`;
         cacheInfo.textContent = '⚠️ Error en la búsqueda';
+        showToast('Error: ' + e.message, 'error');
     }
 
     isProcessing = false;
@@ -857,7 +1055,10 @@ async function cargarHistorial() {
 function toggleHistorial() {
     const section = document.getElementById('historialSection');
     section.classList.toggle('show');
-    if (section.classList.contains('show')) cargarHistorial();
+    if (section.classList.contains('show')) {
+        cargarHistorial();
+        showToast('📜 Historial cargado', 'info');
+    }
 }
 
 // ============================================================
@@ -887,7 +1088,10 @@ async function cargarDashboard() {
 function toggleDashboard() {
     const section = document.getElementById('dashboardSection');
     section.classList.toggle('show');
-    if (section.classList.contains('show')) cargarDashboard();
+    if (section.classList.contains('show')) {
+        cargarDashboard();
+        showToast('📊 Dashboard cargado', 'info');
+    }
 }
 
 // ============================================================
@@ -895,11 +1099,15 @@ function toggleDashboard() {
 // ============================================================
 async function exportarResultados(formato) {
     if (!resultadosActuales || resultadosActuales.length === 0) {
-        alert('No hay resultados para exportar. Realiza una búsqueda primero.');
+        showToast('No hay resultados para exportar', 'warning');
         return;
     }
     try {
-        const res = await fetch('/api/exportar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ formato, resultados: resultadosActuales }) });
+        const res = await fetch('/api/exportar', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ formato, resultados: resultadosActuales }) 
+        });
         if (res.ok) {
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
@@ -908,12 +1116,13 @@ async function exportarResultados(formato) {
             a.download = `resultados.${formato}`;
             a.click();
             window.URL.revokeObjectURL(url);
+            showToast(`✅ Exportado a ${formato.toUpperCase()}`, 'success');
         } else {
             const error = await res.json();
-            alert('Error al exportar: ' + (error.error || 'Desconocido'));
+            showToast('Error: ' + (error.error || 'Desconocido'), 'error');
         }
     } catch (e) {
-        alert('Error: ' + e.message);
+        showToast('Error: ' + e.message, 'error');
     }
 }
 
@@ -938,23 +1147,23 @@ async function authSubmit() {
     const email = document.getElementById('authEmail').value.trim();
     const nombre = document.getElementById('authNombre').value.trim();
     const password = document.getElementById('authPassword').value.trim();
-    if (!email || !password) { alert('Email y contraseña son obligatorios'); return; }
-    if (authMode === 'register' && !nombre) { alert('El nombre es obligatorio'); return; }
+    if (!email || !password) { showToast('Email y contraseña son obligatorios', 'warning'); return; }
+    if (authMode === 'register' && !nombre) { showToast('El nombre es obligatorio', 'warning'); return; }
     const endpoint = authMode === 'login' ? '/api/login' : '/api/registrar';
     const data = authMode === 'login' ? { email, password } : { email, nombre, password };
     try {
         const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         const result = await res.json();
-        if (result.error) { alert(result.error); return; }
+        if (result.error) { showToast(result.error, 'error'); return; }
         if (result.token) {
-            alert('¡Bienvenido ' + result.usuario.nombre + '!');
+            showToast(`¡Bienvenido ${result.usuario.nombre}!`, 'success');
             closeAuth();
         } else if (result.mensaje) {
-            alert(result.mensaje);
+            showToast(result.mensaje, 'success');
             authMode = 'login';
             toggleAuthMode();
         }
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
 }
 
 // ============================================================
@@ -976,6 +1185,27 @@ searchInput.addEventListener('input', function() {
 });
 
 // ============================================================
+// ATEJOS DE TECLADO
+// ============================================================
+document.addEventListener('keydown', function(e) {
+    // Ctrl+K o Ctrl+E para focus en búsqueda
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'e')) {
+        e.preventDefault();
+        searchInput.focus();
+    }
+    // Escape para cerrar modales
+    if (e.key === 'Escape') {
+        closeAuth();
+    }
+    // F5 para recargar dashboard
+    if (e.key === 'F5' && e.ctrlKey) {
+        e.preventDefault();
+        cargarDashboard();
+        showToast('📊 Dashboard recargado', 'info');
+    }
+});
+
+// ============================================================
 // EVENTOS
 // ============================================================
 unificadoBtn.addEventListener('click', buscarUnificado);
@@ -990,7 +1220,10 @@ searchInput.addEventListener('keydown', e => {
 conectarWebSocket();
 cargarHistorial();
 cargarDashboard();
+initVoiceSearch();
 searchInput.focus();
+
+showToast('🚀 Quantum Web Search listo', 'success', 2000);
 </script>
 </body>
 </html>

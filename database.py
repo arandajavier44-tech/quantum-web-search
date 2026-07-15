@@ -1,20 +1,42 @@
-"""
-BASE DE DATOS - SQLite
-RUTA: C:/Users/elpel/OneDrive/Desktop/QuantumWebSearch/database.py
-"""
+# database.py - Versión mejorada
 
 import sqlite3
 from datetime import datetime
+from contextlib import contextmanager
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Database:
     def __init__(self, db_path="historial.db"):
         self.db_path = db_path
         self._crear_tablas()
+        self._crear_indices()
+    
+    @contextmanager
+    def _get_connection(self):
+        """Context manager para conexiones."""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row  # Para acceder por nombre
+        try:
+            yield conn
+        finally:
+            conn.close()
+    
+    def _crear_indices(self):
+        """Crea índices para mejorar rendimiento."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_busquedas_fecha ON busquedas(fecha DESC)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_busquedas_query ON busquedas(query)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_clics_busqueda ON clics(busqueda_id)")
+            conn.commit()
     
     def _crear_tablas(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             
+            # Tabla busquedas con más campos
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS busquedas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,6 +44,8 @@ class Database:
                     algoritmo TEXT NOT NULL,
                     resultados INTEGER,
                     tiempo REAL,
+                    ip TEXT,
+                    usuario_id INTEGER,
                     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
@@ -32,6 +56,7 @@ class Database:
                     busqueda_id INTEGER,
                     url TEXT,
                     relevancia REAL,
+                    posicion INTEGER,
                     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (busqueda_id) REFERENCES busquedas(id)
                 )
@@ -43,66 +68,9 @@ class Database:
                     query TEXT,
                     url TEXT,
                     relevancia REAL,
+                    comentario TEXT,
                     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
             
             conn.commit()
-    
-    def guardar_busqueda(self, query, algoritmo, resultados, tiempo):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO busquedas (query, algoritmo, resultados, tiempo)
-                VALUES (?, ?, ?, ?)
-            """, (query, algoritmo, resultados, tiempo))
-            conn.commit()
-            return cursor.lastrowid
-    
-    def guardar_clic(self, busqueda_id, url, relevancia):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO clics (busqueda_id, url, relevancia)
-                VALUES (?, ?, ?)
-            """, (busqueda_id, url, relevancia))
-            conn.commit()
-    
-    def obtener_historial(self, limite=100):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT id, query, algoritmo, resultados, tiempo, fecha
-                FROM busquedas
-                ORDER BY fecha DESC
-                LIMIT ?
-            """, (limite,))
-            return cursor.fetchall()
-    
-    def obtener_estadisticas(self):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT COUNT(*) FROM busquedas")
-            total = cursor.fetchone()[0]
-            
-            cursor.execute("""
-                SELECT algoritmo, COUNT(*) as count
-                FROM busquedas
-                GROUP BY algoritmo
-                ORDER BY count DESC
-            """)
-            algoritmos = cursor.fetchall()
-            
-            cursor.execute("SELECT AVG(resultados) FROM busquedas")
-            avg_resultados = cursor.fetchone()[0] or 0
-            
-            cursor.execute("SELECT AVG(tiempo) FROM busquedas")
-            avg_tiempo = cursor.fetchone()[0] or 0
-            
-            return {
-                "total_busquedas": total,
-                "algoritmos_mas_usados": algoritmos,
-                "promedio_resultados": round(avg_resultados, 2),
-                "tiempo_promedio": round(avg_tiempo, 2)
-            }
